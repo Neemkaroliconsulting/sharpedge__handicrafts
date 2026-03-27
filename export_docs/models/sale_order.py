@@ -566,7 +566,7 @@ class AccountMoveLine(models.Model):
     )
 
     discount_usd = fields.Monetary(string="Discount USD", currency_field="currency_id")
-    show_in_invoice_print= fields.Boolean("Show in Invoice Print?", default=True)
+    show_in_invoice= fields.Boolean("Show in Invoice Print?", default=True)
 
     
 
