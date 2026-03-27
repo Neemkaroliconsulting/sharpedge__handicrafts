@@ -66,10 +66,10 @@
         </field>
     </record>
 
-    <record id="view_order_line_tree_inherit_checkbox" model="ir.ui.view">
+<record id="view_order_line_tree_inherit_checkbox" model="ir.ui.view">
     <field name="name">sale.order.line.tree.checkbox</field>
     <field name="model">sale.order.line</field>
-    <field name="inherit_id" ref="PASTE_CORRECT_ID_HERE"/>
+    <field name="inherit_id" ref="sale.view_order_line_tree"/>
     <field name="arch" type="xml">
 
         <xpath expr="//field[@name='price_unit']" position="after">
