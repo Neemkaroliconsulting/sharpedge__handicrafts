@@ -399,7 +399,7 @@
                     <t t-set="grouped_lines" t-value="{}" />
 
                     <t t-foreach="o.invoice_line_ids" t-as="l">
-                        <t t-if="l.show_in_invoice_print and l.product_id and l.product_id.type != 'service'">
+                        <t t-if="l.show_in_invoice and l.product_id and l.product_id.type != 'service'">
                             <t t-set="bo"
                                 t-value="
                             (l.sale_line_ids and l.sale_line_ids[0].order_id.buyer_order_no)
@@ -453,7 +453,7 @@
                             <t t-set="grouped_lines" t-value="{}" />
 
                             <t t-foreach="o.invoice_line_ids" t-as="l">
-                                <t t-if="l.show_in_invoice_print and l.product_id and l.product_id.type != 'service'">
+                                <t t-if="l.show_in_invoice and l.product_id and l.product_id.type != 'service'">
                                     <t t-set="bo"
                                         t-value="
                                             (l.sale_line_ids
