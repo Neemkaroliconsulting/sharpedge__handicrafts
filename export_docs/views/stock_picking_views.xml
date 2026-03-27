@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_picking_form_packing" model="ir.ui.view">
+        <field name="name">stock.picking.form.packing</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+
+            <!-- ✅ PRINT BUTTON IN HEADER -->
+            <!-- <xpath expr="//header" position="inside">
+                <button
+                    name="%(product_packaging_dimensions.action_description_select_wizard)d"
+                    string="Print"
+                    type="action"
+                    class="btn-primary"
+                    context="{'active_model': 'stock.picking', 'active_ids': [id]}"
+                />
+
+            </xpath> -->
+
+            <!-- ✅ PACKING TAB -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Packing Information">
+
+                    <!-- 🔹 SUMMARY -->
+                    <group string="Packing Summary" col="4">
+                        <field name="total_packages" readonly="1" />
+                        <field name="total_packed_qty" readonly="1" />
+                        <field name="net_weight" readonly="1" />
+                        <field name="gross_weight" readonly="1" />
+                        <field name="cbm_total" readonly="1" />
+                    </group>
+
+                    <!-- 🔹 PACKING LINES -->
+                    <group string="Packing Lines">
+                        <field name="packing_line_ids">
+                            <list editable="bottom"
+                                attrs="{'readonly': [('state', '=', 'done')]}">
+                                <field name="product_id" />
+                                <field name="packaging_id" />
+                                <field name="case_no_from" />
+                                <field name="case_no_to" />
+                                <field name="box_qty" />
+                                <field name="pcs_per_box" />
+                                <field name="total_units" />
+                                <field name="length" />
+                                <field name="width" />
+                                <field name="height" />
+                                <field name="net_weight" />
+                                <field name="gross_weight" />
+                                <field name="cbm" />
+                            </list>
+                        </field>
+
+                    </group>
+
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

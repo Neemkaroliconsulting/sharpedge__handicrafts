@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- PAPERFORMAT: thode chhote margins -->
+    <record id="paperformat_no_margin" model="report.paperformat">
+        <field name="name">Turbo No Margin</field>
+        <field name="format">A4</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="orientation">Portrait</field>
+    </record>
+
+    <!-- REPORT ACTION: Export Invoice -->
+    <record id="action_export_invoice_report" model="ir.actions.report">
+        <field name="name">Export Invoice</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">export_docs.export_invoice_template</field>
+        <field name="report_file">export_docs.export_invoice_template</field>
+        <field name="paperformat_id" ref="export_docs.paperformat_no_margin"/>
+
+        <!-- Invoice screen par Print dropdown me show -->
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

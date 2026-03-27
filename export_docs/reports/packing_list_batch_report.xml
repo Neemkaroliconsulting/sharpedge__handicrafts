@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_packing_list_batch" model="ir.actions.report">
+        <field name="name">Packing List (Batch)</field>
+        <field name="model">stock.picking.batch</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">export_docs.packing_list_batch_template</field>
+        <field name="report_file">export_docs.packing_list_batch_template</field>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="export_docs.paperformat_export_a4" />
+    </record>
+</odoo>

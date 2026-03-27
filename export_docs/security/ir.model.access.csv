@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+export_docs_access_sale_order,sale.order.export.docs,model_sale_order,base.group_user,1,0,0,0
+access_sale_order_packing_line_user,sale.order.packing.line user,model_sale_order_packing_line,base.group_user,1,1,1,1
+access_sale_order_packing_line_manager,sale.order.packing.line manager,model_sale_order_packing_line,sales_team.group_sale_manager,1,1,1,1
+access_stock_picking,stock.picking,model_stock_picking,base.group_user,1,1,1,1
+access_stock_picking_packing_line_user,stock.picking.packing.line user,model_stock_picking_packing_line,base.group_user,1,1,1,1
+access_packing_print_wizard,access_packing_print_wizard,model_packing_print_wizard,base.group_user,1,1,1,1
+access_batch_packing_line,access.batch.packing.line,model_stock_picking_batch_packing_line,,1,0,0,0
+access_batch_packing_line_user,access.batch.packing.line.user,model_stock_picking_batch_packing_line,base.group_user,1,1,1,1
+access_batch_packing_line,access_batch_packing_line,model_stock_picking_batch_packing_line,stock.group_stock_user,1,1,1,1

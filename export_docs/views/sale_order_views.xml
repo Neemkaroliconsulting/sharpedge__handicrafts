@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ===================== EXPORT INFO TAB ===================== -->
+    <record id="view_order_form_export_info" model="ir.ui.view">
+        <field name="name">sale.order.export.info.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form" />
+        <field name="arch" type="xml">
+
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Export Info">
+
+                    <group string="Main References" col="4">
+                        <field name="exporter_reference" />
+                        <field name="buyer_order_no" />
+                        <field name="buyer_order_date" />
+                        <field name="other_reference" />
+                    </group>
+
+                    <group string="Parties" col="4">
+                        <field name="consignee_id" />
+                        <field name="buyer_id" />
+                        <field name="notify_id" />
+                    </group>
+
+                    <group string="Countries" col="4">
+                        <field name="country_origin_id" />
+                        <field name="country_destination_id" />
+                        <field name="final_destination" />
+                    </group>
+
+                    <group string="Shipment" col="4">
+                        <field name="pre_carriage_by" />
+                        <field name="place_of_receipt" />
+                        <field name="port_loading" />
+                        <field name="port_discharge" />
+                        <field name="vessel_no" />
+                    </group>
+
+                    <group string="Terms &amp; Scheme" col="4">
+                        <field name="terms_delivery" />
+                        <field name="payment_terms_export" />
+                        <field name="incentive_scheme" />
+                    </group>
+
+                    <group string="Settings" col="4">
+                        <field name="dimension_uom" />
+                        <field name="item_rate_uom" />
+                        <field name="issued_warehouse_id" />
+                        <field name="shipped" />
+                    </group>
+                    <group string="Weights &amp; Marks" col="4">
+                        <field name="total_packages" />
+                        <field name="net_weight" />
+                        <field name="gross_weight" />
+                        <field name="cbm_total" />
+                        <field name="marks_numbers" />
+                    </group>
+
+
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ===================== PACKING INFORMATION TAB ===================== -->
+
+    
+
+</odoo>

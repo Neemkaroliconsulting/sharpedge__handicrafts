@@ -1,0 +1,45 @@
+<odoo>
+  <record id="view_picking_batch_form_packing" model="ir.ui.view">
+    <field name="name">stock.picking.batch.form.packing</field>
+    <field name="model">stock.picking.batch</field>
+
+
+    <field name="inherit_id" ref="stock_picking_batch.stock_picking_batch_form" />
+
+    <field name="arch" type="xml">
+
+
+      <!-- <xpath expr="//header" position="inside">
+        <button
+          name="%(product_packaging_dimensions.action_description_select_wizard)d"
+          string="Print"
+          type="action"
+          class="btn-primary"
+          context="{'active_model': 'stock.picking.batch', 'active_ids': [id]}"
+        />
+
+      </xpath> -->
+      <xpath expr="//notebook" position="inside">
+        <page string="Packing Information">
+          <field name="batch_packing_line_ids">
+            <list editable="bottom"
+              attrs="{'readonly': [('picking_id.state', '=', 'done')]}">
+              <field name="packaging_id" />
+              <field name="case_no_from" />
+              <field name="case_no_to" />
+              <field name="box_qty" />
+              <field name="total_units" />
+              <field name="product_ids" widget="many2many_tags" />
+              <field name="length" />
+              <field name="width" />
+              <field name="height" />
+              <field name="net_weight" />
+              <field name="gross_weight" />
+              <field name="cbm" />
+            </list>
+          </field>
+        </page>
+      </xpath>
+    </field>
+  </record>
+</odoo>

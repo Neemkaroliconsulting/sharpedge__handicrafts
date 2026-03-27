@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_packing_print_wizard" model="ir.ui.view">
+        <field name="name">packing.print.wizard.form</field>
+        <field name="model">packing.print.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print Packing List">
+                <group>
+                    <field name="picking_id" readonly="1"/>
+
+                    <!-- ✅ PACKAGING RADIO (OWL SAFE) -->
+                    <!-- <field name="packaging_id" widget="radio"/> -->
+
+                    <separator string="Print Options"/>
+
+                    <field name="show_pcs_per_box"/>
+                    <field name="show_total_qty"/>
+                    <field name="show_dimensions"/>
+                </group>
+
+                <footer>
+                    <button name="action_print"
+                            type="object"
+                            string="Print"
+                            class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_packing_print_wizard" model="ir.actions.act_window">
+        <field name="name">Print Packing</field>
+        <field name="res_model">packing.print.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_picking_id': active_id}</field>
+    </record>
+
+</odoo>

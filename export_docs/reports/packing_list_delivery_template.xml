@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="packing_list_delivery_template">
+        <t t-call="web.basic_layout">
+            <t t-set="picking" t-value="docs[0]" />
+            <t t-set="sale" t-value="picking.sale_id" />
+
+            <t t-set="invoice"
+                t-value="env['account.move'].browse(context.get('invoice_id'))" />
+
+            <t t-set="packing_lines" t-value="picking.packing_line_ids" />
+
+            <!-- 🔹 GROUP PACKING LINES BUYER ORDER WISE (FROM INVOICE) -->
+            <t t-set="grouped_lines" t-value="{}" />
+
+            <t t-foreach="packing_lines" t-as="l">
+                <t t-set="bo" t-value="invoice.buyer_order_no or 'NO BUYER ORDER'" />
+
+                <t t-set="current"
+                    t-value="grouped_lines.get(bo, [])" />
+
+                <t t-set="grouped_lines"
+                    t-value="dict(grouped_lines, **{bo: current + [l]})" />
+            </t>
+
+
+            <t t-set="wiz" t-value="context.get('wizard_data', {})" />
+
+            <div class="page" style="font-family:Times New Roman; font-size:11.5px;">
+                <style>
+
+                    body, table, td, th {
+                    font-family:Times New Roman, serif;
+                    font-size: 11.5px;
+                    border-collapse: collapse;
+                    }
+
+                    .title{
+                    font-size: 25px;
+                    font-weight: bold;
+                    text-align: center;
+                    }
+
+
+                    table {
+                    width: 100%;
+
+                    }
+                    th, td {
+                    border: 1px solid #000;
+                    padding: 6px;
+                    vertical-align: top;
+                    }
+                    th {
+                    background: #f2f2f2;
+                    text-align: center;
+                    }
+                    .no-border td {
+                    border: none;
+                    }
+
+
+                    /* BODY: only left &amp; right borders */
+                    table.item-table td {
+                    border-left: 1px solid #000;
+                    border-right: 1px solid #000;
+                    border-top: none;
+                    border-bottom: none;
+                    padding: 6px;
+                    vertical-align: top;
+                    }
+
+                    .text-right { text-align: right; }
+                    .text-center { text-align: center; }
+                </style>
+                <h2 style="text-align:center;">PACKING LIST</h2>
+                <t t-set="buyer_orders" t-value="[]" />
+
+                <t t-if="sale and sale.buyer_order_no">
+                    <t t-set="buyer_orders"
+                        t-value="[sale.buyer_order_no]" />
+                </t>
+
+                <table width="100%" border="1" style="border-collapse:collapse;">
+                    <tr>
+
+                        <!-- LEFT : EXPORTER (COMMON) -->
+                        <td width="50%" style="padding:6px;">
+                            <strong>Exporter</strong>
+                            <br />
+
+                            <table>
+                                <!-- LOGO -->
+                                <td width="25%" style="vertical-align:top; border:none;">
+                                    <t t-if="sale.company_id.logo">
+                                        <img t-att-src="image_data_uri(sale.company_id.logo)"
+                                            style="max-height:80px; max-width:200px;" />
+                                    </t>
+                                </td>
+                                <td width="75%" style="vertical-align:top; border:none;">
+                                    <strong>
+                                        <t t-esc="sale.company_id.name" />
+                                    </strong>
+                                    <br />
+
+                                    <t t-if="sale.company_id.street">
+                                        <t t-esc="sale.company_id.street" />
+                                        <br />
+                                    </t>
+
+                                    <t t-if="sale.company_id.city">
+                                        <t t-esc="sale.company_id.city" />
+                                    </t>
+
+                                    <t t-if="sale.company_id.country_id">
+                                        <t t-if="sale.company_id.city">, </t>
+                                        <t t-esc="sale.company_id.country_id.name" />
+                                    </t>
+                                    <br />
+
+                                    <t t-if="sale.company_id.vat">
+                                        <strong>GSTIN :</strong>
+                                        <t t-esc="sale.company_id.vat" />
+                                    </t>
+                                </td>
+                            </table>
+                        </td>
+                        <!-- INVOICE HEADER -->
+                        <td width="50%" style="padding:6px;">
+
+                            <!-- Invoice reference (sirf invoice se print hua ho to) -->
+                            <t t-if="invoice">
+                                <strong>Invoice No:</strong>
+                                <t t-esc="invoice.name" />
+                                <br />
+                                <strong>Invoice Date:</strong>
+                                <t t-esc="invoice.invoice_date" />
+                                <br />
+                            </t>
+
+                            <!-- Delivery hamesha show hogi -->
+                            <strong>Delivery Ref:</strong>
+                            <t t-esc="picking.name" />
+                            <br />
+                            <strong>Scheduled Date:</strong>
+                            <t t-esc="picking.scheduled_date" />
+                            <br />
+                            <strong>Exporter Ref :</strong>
+                            <t t-esc="invoice.exporter_reference" />
+                            <br />
+                            <strong>Buyer Order No :</strong>
+                            <t t-esc="'/ '.join(buyer_orders)" />
+
+
+                        </td>
+                    </tr>
+                </table>
+
+
+                <!-- CONSIGNEE -->
+                <table width="100%" border="1" style="border-collapse:collapse;">
+                    <tr>
+                        <td width="50%" style="padding:6px;">
+                            <strong>Consignee</strong><br />
+                                <t t-esc="sale.consignee_id.name" /><br />
+                                <t
+                                t-esc="sale.consignee_id.street" /><br />
+                                <t
+                                t-esc="sale.consignee_id.city" />, <t
+                                t-esc="sale.consignee_id.country_id.name" />
+                        </td>
+
+                        <td width="50%">
+                            <strong>Buyer (if other than consignee)</strong>
+                            <br />
+                            <t t-esc="sale.buyer_id.name" />
+                        </td>
+                    </tr>
+                </table>
+
+                <table>
+                    <tr>
+                        <td> Country of Origin<br />
+                                <strong>
+                                <t t-esc="sale.country_origin_id.name" />
+                            </strong>
+                        </td>
+                        <td> Final Destination<br />
+                                <strong>
+                                <t t-esc="sale.country_destination_id.name" />
+                            </strong>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Pre-Carriage By<br /><strong>
+                                <t t-esc="sale.pre_carriage_by" />
+                            </strong></td>
+                        <td>Place of Receipt<br /><strong>
+                                <t t-esc="sale.place_of_receipt" />
+                            </strong></td>
+                        <tr>
+                            <td>Port of Loading<br /><strong>
+                                    <t t-esc="sale.port_loading" />
+                                </strong></td>
+                            <td>Port of Discharge<br /><strong>
+                                    <t t-esc="sale.port_discharge" />
+                                </strong></td>
+                        </tr>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2"> Terms of Delivery &amp; Payment<br />
+                                <t
+                                t-esc="sale.terms_delivery" /> / <t
+                                t-esc="sale.payment_terms_export" />
+                        </td>
+                    </tr>
+                </table>
+
+                <t t-set="total_pkgs" t-value="0" />
+                <t t-set="total_net" t-value="0.0" />
+                <t t-set="total_gross" t-value="0.0" />
+                <t t-set="total_cbm" t-value="0.0" />
+
+
+                <!-- ITEMS -->
+                <table width="100%" border="1" style="min-height:400px;" class="item-table">
+                    <thead>
+                        <tr>
+                            <th>PKGS</th>
+                            <th t-if="wiz.get('show_pcs_per_box')">PCS / Box</th>
+                            <th>Item Ref</th>
+                            <th>Product</th>
+                            <th t-if="wiz.get('show_total_qty')">Total Qty</th>
+                            <th>Net Wt</th>
+                            <th>Gross Wt</th>
+                            <th>CBM</th>
+                            <th t-if="wiz.get('show_dimensions')">Box Dimensions(cms) </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <t t-set="case_start" t-value="1" />
+                        <t t-set="total_boxes" t-value="0" />
+
+                        <t t-foreach="grouped_lines.items()" t-as="grp">
+
+                            <!-- BUYER ORDER HEADING -->
+                            <tr style="height:28px;">
+                                    <td colspan="100%"
+                                        style="
+                                            font-weight:bold;
+                                            background:#f2f2f2;
+                                            padding:6px;
+                                            vertical-align:middle;
+                                            border:1px solid #000;
+                                        ">
+                                        Buyer Order No : <t t-esc="grp[0]" />
+                                    </td>
+                                </tr>
+                            <t t-foreach="grp[1]" t-as="line">
+
+                                
+
+                                <!-- totals -->
+                                <t t-set="total_pkgs"
+                                    t-value="total_pkgs + (line.box_qty or 0)" />
+                                <t t-set="total_net"
+                                    t-value="total_net + ((line.net_weight or 0) * (line.box_qty or 0))" />
+                                <t t-set="total_gross"
+                                    t-value="total_gross + ((line.gross_weight or 0) * (line.box_qty or 0))" />
+                                <t t-set="total_cbm"
+                                    t-value="total_cbm + ((line.cbm or 0) * (line.box_qty or 0))" />
+
+
+                                <tr>
+                                    <td>
+                                        <t t-esc="line.case_no_from" /> - <t
+                                            t-esc="line.case_no_to" />
+                                    </td>
+
+
+                                    <td t-if="wiz.get('show_pcs_per_box')">
+                                        <t t-esc="line.pcs_per_box" />
+                                    </td>
+
+                                    <td>
+                                        <t t-set="partner"
+                                            t-value="invoice and invoice.partner_id or sale.partner_id" />
+
+                                        <t t-set="tmpl"
+                                            t-value="line.product_id.product_tmpl_id" />
+
+                                        <t t-set="mapping"
+                                            t-value="tmpl.customer_sku_ids.filtered(
+                                            lambda m: m.customer_id == partner
+                                        )" />
+
+                                        <t
+                                            t-if="wiz.get('description_mode') == 'buyer' and mapping">
+                                            <t t-esc="mapping[0].buyer_sku" />
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="line.product_id.default_code or ''" />
+                                        </t>
+                                    </td>
+
+
+                                    <td>
+                                        <t t-set="partner"
+                                            t-value="invoice and invoice.partner_id or sale.partner_id" />
+
+                                        <t t-set="tmpl"
+                                            t-value="line.product_id.product_tmpl_id" />
+
+                                        <t t-set="mapping"
+                                            t-value="tmpl.customer_sku_ids.filtered(
+                                            lambda m: m.customer_id == partner
+                                        )" />
+
+                                        <!-- BUYER DESCRIPTION -->
+                                        <t
+                                            t-if="wiz.get('description_mode') == 'buyer' and mapping">
+                                            <t t-esc="mapping[0].customer_description" />
+                                        </t>
+
+                                        <!-- EXPORT DESCRIPTION -->
+                                        <t
+                                            t-elif="wiz.get('description_mode') == 'export' and tmpl.export_description">
+                                            <t t-esc="tmpl.export_description" />
+                                        </t>
+
+                                        <!-- FOREIGN DESCRIPTION -->
+                                        <t
+                                            t-elif="wiz.get('description_mode') == 'foreign' and tmpl.foreign_description">
+                                            <t t-esc="tmpl.foreign_description" />
+                                        </t>
+
+                                        <!-- FALLBACK -->
+                                        <t t-else="">
+                                            <t t-esc="line.product_id.display_name" />
+                                        </t>
+                                    </td>
+
+
+                                    <td t-if="wiz.get('show_total_qty')">
+                                        <t t-esc="line.box_qty * line.pcs_per_box" />
+                                    </td>
+
+                                    <td>
+                                        <t t-esc="line.net_weight" />
+                                    </td>
+                                    <td>
+                                        <t t-esc="line.gross_weight" />
+                                    </td>
+                                    <td>
+                                        <t t-esc="line.cbm" />
+                                    </td>
+
+                                    <td t-if="wiz.get('show_dimensions')">
+                                        <t t-esc="line.length or 0" /> × <t
+                                            t-esc="line.width or 0" /> × <t
+                                            t-esc="line.height or 0" />
+                                    </td>
+                                </tr>
+
+                                
+
+                                <t t-set="total_boxes"
+                                    t-value="total_boxes + line.box_qty" />
+
+
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- TOTALS -->
+                <table width="100%" border="1" style="border-collapse:collapse;">
+                    <tr>
+                        <td style="padding:6px;">
+                            <strong>Total PKGS:</strong> <t t-esc="total_pkgs" /> &#160;&#160; <strong>Net
+                            Wt (Kg):</strong> <t t-esc="round(total_net,3)" /> &#160;&#160; <strong>Gross
+                            Wt (Kg):</strong> <t t-esc="round(total_gross,3)" /> &#160;&#160; <strong>
+                            CBM:</strong> <t t-esc="round(total_cbm,3)" />
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- SIGN -->
+                <table width="100%">
+                    <tr>
+                        <td width="70%">
+                            <strong>DECLARATION:</strong><br /> We declare that this packing list
+                            shows the actual particulars of goods packed. </td>
+                        <td width="30%" style="text-align:center;">
+                            <strong>For <t t-esc="sale.company_id.name" /></strong><br /><br />
+                            Authorised Signatory </td>
+                    </tr>
+                </table>
+
+            </div>
+        </t>
+    </template>
+
+</odoo>

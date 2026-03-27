@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_common_invoice_document">
+        <t t-call="web.external_layout">
+            <t t-foreach="docs" t-as="inv">
+                <div class="page">
+
+                    <!-- ===== TITLE ===== -->
+                    <h2 t-if="action_id == 'export_docs.action_export_invoice'">
+                        EXPORT INVOICE
+</h2>
+
+                    <h2 t-if="action_id == 'export_docs.action_packing_list'">
+                        PACKING LIST
+</h2>
+
+                    <h2 t-if="action_id == 'export_docs.action_tax_invoice'">
+                        TAX INVOICE
+</h2>
+
+
+                    <!-- ===== BASIC INFO ===== -->
+                    <p>
+                        <b>Invoice No:</b>
+                        <span t-esc="inv.name" />
+                    </p>
+                    <p>
+                        <b>Customer:</b>
+                        <span t-esc="inv.partner_id.name" />
+                    </p>
+
+                    <!-- ===== TABLE ===== -->
+                    <table border="1" width="100%" style="border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Qty</th>
+
+                                <!-- Export & Tax -->
+                                <th t-if="ctx.get('doc_type') != 'packing'">Rate</th>
+
+                                <!-- Tax only -->
+                                <th t-if="ctx.get('doc_type') == 'tax'">Tax</th>
+
+                                <th t-if="ctx.get('doc_type') != 'packing'">Amount</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr t-foreach="inv.invoice_line_ids" t-as="line">
+                                <td t-esc="line.name" />
+                                <td t-esc="line.quantity" />
+
+                                <td t-if="ctx.get('doc_type') != 'packing'"
+                                    t-esc="line.price_unit" />
+
+                                <td t-if="ctx.get('doc_type') == 'tax'">
+                                    <span t-esc="', '.join(t.name for t in line.tax_ids)" />
+                                </td>
+
+                                <td t-if="ctx.get('doc_type') != 'packing'"
+                                    t-esc="line.price_subtotal" />
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- ===== PACKING EXTRA ===== -->
+                    <t t-if="ctx.get('doc_type') == 'packing'">
+                        <p>
+                            <b>Total Packages:</b>
+                            <span t-esc="inv.total_packages" />
+                        </p>
+                        <p>
+                            <b>Net Weight:</b>
+                            <span t-esc="inv.net_weight" />
+                        </p>
+                    </t>
+
+                    <!-- ===== TOTAL ===== -->
+                    <t t-if="ctx.get('doc_type') != 'packing'">
+                        <p style="text-align:right;">
+                            <b>Total:</b>
+                            <span t-esc="inv.amount_total" />
+                        </p>
+                    </t>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+
+</odoo>
