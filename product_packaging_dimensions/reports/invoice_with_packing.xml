@@ -1,0 +1,75 @@
+<odoo>
+
+    <record id="action_invoice_with_packing" model="ir.actions.report">
+        <field name="name">Invoice with Packing List</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">product_packaging_dimensions.invoice_with_packing</field>
+        <field name="report_file">product_packaging_dimensions.invoice_with_packing</field>
+        <field name="print_report_name">'Invoice-Packing-%s' % (object.name)</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="invoice_with_packing">
+        <t t-call="web.external_layout">
+            <t t-foreach="docs" t-as="o">
+
+                <h2 style="text-align:center;">INVOICE CUM PACKING LIST</h2>
+
+                <p><b>Invoice No:</b> <t t-esc="o.name"/></p>
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="o.invoice_line_ids" t-as="l">
+                            <tr>
+                                <td><t t-esc="l.product_id.display_name"/></td>
+                                <td><t t-esc="l.quantity"/></td>
+                                <td><t t-esc="l.price_subtotal"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <div style="page-break-before: always;"></div>
+
+                <h3>PACKING LIST</h3>
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Packing</th>
+                            <th>L</th>
+                            <th>B</th>
+                            <th>H</th>
+                            <th>CBM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="o.invoice_line_ids" t-as="l">
+                            <t t-foreach="l.product_id.packaging_ids" t-as="p">
+                                <tr>
+                                    <td><t t-esc="p.name"/></td>
+                                    <td><t t-esc="p.x_box_length"/></td>
+                                    <td><t t-esc="p.x_box_width"/></td>
+                                    <td><t t-esc="p.x_box_height"/></td>
+                                    <td><t t-esc="p.x_cbm"/></td>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+
+            </t>
+        </t>
+    </template>
+
+</odoo>
+

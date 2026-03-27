@@ -1,0 +1,77 @@
+<odoo>
+
+<!-- 1️⃣ TAX INVOICE -->
+<template id="report_tax_invoice">
+    <t t-call="web.external_layout">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="account.report_invoice_document">
+                <t t-set="o" t-value="o"/>
+            </t>
+        </t>
+    </t>
+</template>
+
+<!-- 2️⃣ EXPORT INVOICE -->
+<template id="report_export_invoice">
+    <t t-call="web.external_layout">
+        <t t-foreach="docs" t-as="o">
+            <h2>Export Invoice</h2>
+            <t t-call="account.report_invoice_document">
+                <t t-set="o" t-value="o"/>
+            </t>
+        </t>
+    </t>
+</template>
+
+<!-- 3️⃣ PACKING LIST -->
+<template id="report_packing_list">
+    <t t-call="web.external_layout">
+        <t t-foreach="docs" t-as="o">
+            <h2>Packing List</h2>
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>Product</th>
+                    <th>Packing</th>
+                    <th>Qty</th>
+                    <th>L</th>
+                    <th>B</th>
+                    <th>H</th>
+                </tr>
+                <t t-foreach="o.invoice_line_ids" t-as="l">
+                    <t t-foreach="l.product_id.packaging_ids" t-as="p">
+                        <tr>
+                            <td><t t-esc="l.product_id.name"/></td>
+                            <td><t t-esc="p.name"/></td>
+                            <td><t t-esc="p.qty"/></td>
+                            <td><t t-esc="p.x_box_length"/></td>
+                            <td><t t-esc="p.x_box_width"/></td>
+                            <td><t t-esc="p.x_box_height"/></td>
+                        </tr>
+                    </t>
+                </t>
+            </table>
+        </t>
+    </t>
+</template>
+
+<!-- 4️⃣ INVOICE + PACKING -->
+<template id="report_invoice_cum_packing">
+    <t t-call="web.external_layout">
+        <t t-foreach="docs" t-as="o">
+
+            <t t-call="account.report_invoice_document">
+                <t t-set="o" t-value="o"/>
+            </t>
+
+            <div style="page-break-before: always;"/>
+
+            <h2>Packing List</h2>
+            <t t-call="product_packaging_dimensions.report_packing_list"/>
+
+        </t>
+    </t>
+</template>
+
+</odoo>
+

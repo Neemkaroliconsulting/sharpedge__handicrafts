@@ -1,0 +1,17 @@
+<odoo>
+    <template id="report_test_invoice">
+        <t t-call="web.external_layout">
+            <t t-foreach="docs" t-as="o">
+                <h2 style="text-align:center;">
+                    TEST PRINT WORKING
+                </h2>
+
+                <p>
+                    Invoice Number:
+                    <t t-esc="o.name"/>
+                </p>
+            </t>
+        </t>
+    </template>
+</odoo>
+

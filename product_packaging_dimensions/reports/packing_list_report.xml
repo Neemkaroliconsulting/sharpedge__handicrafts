@@ -1,0 +1,37 @@
+<odoo>
+    <template id="packing_list_report_inherit"
+              inherit_id="sale.report_saleorder_document">
+
+        <xpath expr="//t[@t-foreach='doc.order_line']" position="inside">
+            <div style="margin-top:6px;">
+                <p>
+                    <strong>Product Size:</strong>
+                    <span t-esc="line.product_id.x_product_length"/> x
+                    <span t-esc="line.product_id.x_product_width"/> x
+                    <span t-esc="line.product_id.x_product_height"/>
+                </p>
+
+                <p>
+                    <strong>Weight:</strong>
+                    <span t-esc="line.product_id.weight"/> kg
+                </p>
+
+                <t t-if="line.product_packaging_id">
+                    <p>
+                        <strong>Box Size:</strong>
+                        <span t-esc="line.product_packaging_id.x_box_length"/> x
+                        <span t-esc="line.product_packaging_id.x_box_width"/> x
+                        <span t-esc="line.product_packaging_id.x_box_height"/>
+                    </p>
+
+                    <p>
+                        <strong>Qty per Box:</strong>
+                        <span t-esc="line.product_packaging_id.qty"/>
+                    </p>
+                </t>
+            </div>
+        </xpath>
+
+    </template>
+</odoo>
+

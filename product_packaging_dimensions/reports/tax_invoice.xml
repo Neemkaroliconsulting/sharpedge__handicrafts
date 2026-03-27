@@ -1,0 +1,11 @@
+<odoo>
+    <report
+        id="action_tax_invoice"
+        model="sale.order"
+        string="Tax Invoice"
+        report_type="qweb-pdf"
+        name="product_packaging_dimensions.report_tax_invoice"
+        file="product_packaging_dimensions.report_tax_invoice"
+    />
+</odoo>
+

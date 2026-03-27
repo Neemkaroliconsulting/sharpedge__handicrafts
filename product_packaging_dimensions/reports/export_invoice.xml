@@ -1,0 +1,11 @@
+<odoo>
+    <report
+        id="action_export_invoice"
+        model="sale.order"
+        string="Export Invoice"
+        report_type="qweb-pdf"
+        name="product_packaging_dimensions.report_export_invoice"
+        file="product_packaging_dimensions.report_export_invoice"
+    />
+</odoo>
+

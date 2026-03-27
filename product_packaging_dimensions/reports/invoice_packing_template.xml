@@ -1,0 +1,90 @@
+<odoo>
+
+<template id="report_invoice_with_packing">
+    <t t-call="web.external_layout">
+        <t t-foreach="docs" t-as="inv">
+
+            <!-- ================= INVOICE ================= -->
+            <h2 style="text-align:center;">TAX INVOICE</h2>
+
+            <table class="table table-sm">
+                <tr>
+                    <td><b>Invoice No:</b> <t t-esc="inv.name"/></td>
+                    <td><b>Date:</b> <t t-esc="inv.invoice_date"/></td>
+                </tr>
+                <tr>
+                    <td><b>Customer:</b> <t t-esc="inv.partner_id.name"/></td>
+                    <td><b>GST:</b> <t t-esc="inv.partner_id.vat"/></td>
+                </tr>
+            </table>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="inv.invoice_line_ids" t-as="l">
+                        <tr>
+                            <td><t t-esc="l.product_id.display_name"/></td>
+                            <td><t t-esc="l.quantity"/></td>
+                            <td><t t-esc="l.price_unit"/></td>
+                            <td><t t-esc="l.price_subtotal"/></td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+
+            <p style="text-align:right;">
+                <b>Total:</b> <t t-esc="inv.amount_total"/>
+            </p>
+
+            <!-- PAGE BREAK -->
+            <div style="page-break-before: always;"></div>
+
+            <!-- ================= PACKING LIST ================= -->
+            <h2 style="text-align:center;">PACKING LIST</h2>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Packing</th>
+                        <th>Qty</th>
+                        <th>L</th>
+                        <th>B</th>
+                        <th>H</th>
+                        <th>Net Wt</th>
+                        <th>Gross Wt</th>
+                        <th>CBM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="inv.invoice_line_ids" t-as="l">
+                        <t t-foreach="l.sale_line_ids" t-as="sl">
+                            <t t-foreach="sl.product_id.packaging_ids" t-as="p">
+                                <tr>
+                                    <td><t t-esc="p.name"/></td>
+                                    <td><t t-esc="p.qty"/></td>
+                                    <td><t t-esc="p.x_box_length"/></td>
+                                    <td><t t-esc="p.x_box_width"/></td>
+                                    <td><t t-esc="p.x_box_height"/></td>
+                                    <td><t t-esc="p.x_net_weight"/></td>
+                                    <td><t t-esc="p.x_gross_weight"/></td>
+                                    <td><t t-esc="p.x_cbm"/></td>
+                                </tr>
+                            </t>
+                        </t>
+                    </t>
+                </tbody>
+            </table>
+
+        </t>
+    </t>
+</template>
+
+</odoo>
+

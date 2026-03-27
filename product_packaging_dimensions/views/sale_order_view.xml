@@ -1,0 +1,19 @@
+<odoo>
+    <record id="sale_order_line_buyer_sku_inline" model="ir.ui.view">
+        <field name="name">sale.order.line.buyer.sku.inline</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Inject Buyer SKU inside Product cell -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_id']"
+                   position="inside">
+                <div class="text-muted o_text_overflow">
+                    <span>Buyer SKU: </span>
+                    <field name="buyer_sku" readonly="1" nolabel="1"/>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,20 @@
+<odoo>
+    <record id="view_move_form_invoice_packing_button" model="ir.ui.view">
+        <field name="name">account.move.form.invoice.packing.button</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button
+                    name="action_print_invoice_cum_packing"
+                    type="object"
+                    string="Invoice Cum Packing"
+                    class="btn-primary"
+                />
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
+

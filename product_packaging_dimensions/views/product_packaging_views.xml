@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="product_packaging_tree_export_style" model="ir.ui.view">
+        <field name="name">product.packaging.tree.export.style</field>
+        <field name="model">product.packaging</field>
+        <field name="inherit_id" ref="product.product_packaging_tree_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='package_type_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='company_id']" position="attributes">
+                <attribute name="optional">hide</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='qty']" position="after">
+
+                <field name="packaging_product_id"/>
+
+
+                <field name="x_box_length"/>
+                <field name="x_box_width"/>
+                <field name="x_box_height"/>
+
+                <field name="x_net_weight" readonly="1" force_save="1"/>
+                <field name="x_gross_weight" readonly="1" force_save="1"/>
+
+                <field name="x_cbm" readonly="1"/>
+                <field name="x_cft" readonly="1"/>
+
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

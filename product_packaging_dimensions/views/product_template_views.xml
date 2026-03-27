@@ -1,0 +1,89 @@
+<odoo>
+    <record id="product_template_form_dimensions_tab" model="ir.ui.view">
+        <field name="name">product.template.form.dimensions.tab</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='inventory']" position="after">
+                <page string="Product Dimensions" name="product_dimensions">
+                    <group>
+                        <group string="Dimensions">
+                            <label for="x_product_length" />
+                            <div class="o_row">
+                                <field name="x_product_length" />
+                                <field name="x_dimension_uom_id"
+                                    options="{'no_open': True, 'no_create': True}"
+                                    groups="uom.group_uom" />
+                            </div>
+
+                            <label for="x_product_width" />
+                            <div class="o_row">
+                                <field name="x_product_width" />
+                                <field name="x_dimension_uom_id" readonly="1"
+                                    options="{'no_open': True}" groups="uom.group_uom" />
+                            </div>
+
+                            <label for="x_product_height" />
+                            <div class="o_row">
+                                <field name="x_product_height" />
+                                <field name="x_dimension_uom_id" readonly="1"
+                                    options="{'no_open': True}" groups="uom.group_uom" />
+                            </div>
+
+                            <label for="x_product_thickness" />
+                            <div class="o_row">
+                                <field name="x_product_thickness" />
+                                <field name="x_dimension_uom_id" readonly="1"
+                                    options="{'no_open': True}" groups="uom.group_uom" />
+                            </div>
+                        </group>
+
+                        <group string="Weight &amp; Logistics">
+                            <label for="x_product_net_weight" />
+                            <div class="o_row">
+                                <field name="x_product_net_weight" />
+                                <field name="x_weight_uom_id"
+                                    options="{'no_open': True, 'no_create': True}"
+                                    groups="uom.group_uom" />
+                            </div>
+
+                            <!-- <field name="x_buyer_sku" /> -->
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+
+            <xpath expr="//page[@name='sales']/group" position="inside">
+                <group string="Descriptions">
+                    <field name="export_description"/>
+                    <field name="buyer_description"/>
+                    <field name="foreign_description"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="product_template_form_customer_sku" model="ir.ui.view">
+        <field name="name">product.template.form.customer.sku</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Customer SKU">
+                    <field name="customer_sku_ids">
+                        <list editable="bottom">
+                            <field name="customer_id"/>
+                            <field name="buyer_sku"/>
+                            <field name="customer_description"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

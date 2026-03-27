@@ -1,0 +1,20 @@
+<odoo>
+    <record id="action_invoice_cum_packing" model="ir.actions.report">
+        <field name="name">Invoice Cum Packing</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+
+        <!-- EXACT MATCH -->
+        <field name="report_name">
+            product_packaging_dimensions.report_invoice_cum_packing
+        </field>
+        <field name="report_file">
+            product_packaging_dimensions.report_invoice_cum_packing
+        </field>
+
+        <!-- 🔥 THIS makes Print button -->
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
+

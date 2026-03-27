@@ -1,0 +1,26 @@
+<odoo>
+
+    <!-- ================= INVOICE PRINT DROPDOWN ACTION ================= -->
+    <record id="action_invoice_with_packing" model="ir.actions.report">
+        <field name="name">Invoice with Packing List</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+
+        <field name="report_name">
+            product_packaging_dimensions.report_invoice_with_packing
+        </field>
+        <field name="report_file">
+            product_packaging_dimensions.report_invoice_with_packing
+        </field>
+
+        <!-- THIS MAKES IT APPEAR IN INVOICE PRINT DROPDOWN -->
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+
+        <field name="print_report_name">
+            'Invoice-Packing-%s' % (object.name)
+        </field>
+    </record>
+
+</odoo>
+
