@@ -66,19 +66,18 @@
         </field>
     </record>
 
-    <record id="view_order_form_line_checkbox" model="ir.ui.view">
-        <field name="name">sale.order.form.line.checkbox</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_order_form" />
-        <field name="arch" type="xml">
+    <record id="debug_order_line_tree" model="ir.ui.view">
+    <field name="name">debug.sale.order.line.tree</field>
+    <field name="model">sale.order.line</field>
+    <field name="inherit_id" ref="sale.view_order_line_tree_editable"/>
+    <field name="arch" type="xml">
 
-            <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']"
-                position="after">
-                <field name="show_in_invoice" />
-            </xpath>
+        <xpath expr="//tree" position="inside">
+            <field name="show_in_invoice"/>
+        </xpath>
 
-        </field>
-    </record>
+    </field>
+</record>
 
 
 </odoo>
