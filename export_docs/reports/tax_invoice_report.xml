@@ -116,9 +116,8 @@
                 <t t-set="freight_total" t-value="0.0" />
                 <t t-foreach="freight_lines" t-as="l">
                     <t t-set="freight_total"
-                        t-value="l.price_subtotal+l.price_subtotal
-                                    <!-- * (l.tax_ids and l.tax_ids[0].amount or 0)
-                                    / 100" /> -->
+                        t-value="l.price_subtotal
+                                    " /> 
                 </t>
 
                 <t t-set="insurance_total" t-value="0.0" />
@@ -127,7 +126,7 @@
                         t-value="
            insurance_total
            + l.price_subtotal
-           <!-- + (l.price_subtotal * (l.tax_ids and l.tax_ids[0].amount or 0) / 100) -->
+          
        "
                     />
                 </t>
