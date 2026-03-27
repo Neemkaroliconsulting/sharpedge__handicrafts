@@ -488,7 +488,7 @@
                             <t t-set="row_index" t-value="0" />
 
                             <t t-foreach="o.invoice_line_ids" t-as="line">
-                               <t t-if="line.show_in_invoice_print and line.product_id and line.product_id.type != 'service'">
+                               <t t-if="line.show_in_invoice and line.product_id and line.product_id.type != 'service'">
 
                                     <t t-set="row_index" t-value="row_index + 1" />
                                 </t>
