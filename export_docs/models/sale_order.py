@@ -187,6 +187,13 @@ class SaleOrderLine(models.Model):
     )
 
     cbm = fields.Float("CBM", compute="_compute_cbm", store=True, digits=(16, 4))
+    show_in_invoice = fields.Boolean("Show in Invoice?", default=True)
+    def _prepare_invoice_line(self, **optional_values):
+        res = super()._prepare_invoice_line(**optional_values)
+        res.update({
+            'show_in_invoice_print': self.show_in_invoice_print
+        })
+        return res
 
     # @api.onchange("product_id")
     # def _onchange_product_fill_from_packaging(self):
@@ -284,12 +291,6 @@ class SaleOrderLine(models.Model):
                 line.cbm = per * count
             else:
                 line.cbm = 0.0
-
-
-
-   
-
-
 
 
 # =========================================================
@@ -565,6 +566,9 @@ class AccountMoveLine(models.Model):
     )
 
     discount_usd = fields.Monetary(string="Discount USD", currency_field="currency_id")
+    show_in_invoice_print= fields.Boolean("Show in Invoice Print?", default=True)
+
+    
 
 
 class ExportInvoiceReport(models.AbstractModel):
