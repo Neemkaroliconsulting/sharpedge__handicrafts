@@ -191,7 +191,7 @@ class SaleOrderLine(models.Model):
     def _prepare_invoice_line(self, **optional_values):
         res = super()._prepare_invoice_line(**optional_values)
         res.update({
-            'show_in_invoice_print': self.show_in_invoice_print
+            'show_in_invoice': self.show_in_invoice
         })
         return res
 
