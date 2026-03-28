@@ -360,6 +360,16 @@ class AccountMove(models.Model):
         string="Discount USD", currency_field="currency_id", default=0.0, readonly=True
     )
 
+    def _post(self, soft=True):
+    res = super()._post(soft)
+
+    for move in self:
+        for line in move.invoice_line_ids:
+            if line.sale_line_ids:
+                line.show_in_invoice = line.sale_line_ids[0].show_in_invoice
+
+    return res
+
     @api.model
     def create(self, vals):
         move = super(
