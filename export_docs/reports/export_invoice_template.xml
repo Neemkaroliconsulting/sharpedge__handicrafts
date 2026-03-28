@@ -339,7 +339,7 @@
                     <t t-set="grouped_lines" t-value="{}" />
 
                     <t t-foreach="o.invoice_line_ids" t-as="line">
-                        <t t-if="l.show_in_invoice and l.product_id and l.product_id.type != 'service'">
+                        <t t-if="line.show_in_invoice and line.product_id and line.product_id.type != 'service'">
 
                             <t t-set="bo"
                                 t-value="
