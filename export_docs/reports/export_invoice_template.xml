@@ -374,13 +374,57 @@
                         </thead>
 
                         <tbody>
+    <t t-set="sr" t-value="1"/>
+
+    <t t-foreach="o.invoice_line_ids" t-as="line">
+
+        <t t-if="not line.display_type and line.product_id">
+
+            <tr>
+                <td class="text-center">
+                    <t t-esc="sr"/>
+                </td>
+
+                <td>
+                    <t t-esc="line.product_id.default_code or ''"/>
+                </td>
+
+                <td>
+                    <t t-esc="line.name"/>
+                </td>
+
+                <td class="text-right">
+                    <t t-esc="line.product_id.l10n_in_hsn_code or ''"/>
+                </td>
+
+                <td class="text-right">
+                    <t t-esc="line.quantity"/>
+                </td>
+
+                <td class="text-right">
+                    <t t-esc="line.price_unit"/>
+                </td>
+
+                <td class="text-right">
+                    <t t-esc="line.price_subtotal"/>
+                </td>
+            </tr>
+
+            <t t-set="sr" t-value="sr + 1"/>
+
+        </t>
+
+    </t>
+</tbody>
+
+                        <!-- <tbody>
 
                             <t t-set="sr" t-value="1" />
 
-                            <!-- BUYER ORDER LOOP -->
+                            <! BUYER ORDER LOOP 
                             <t t-foreach="grouped_lines.items() or []" t-as="grp">
 
-                                <!-- BUYER ORDER HEADING -->
+                                < BUYER ORDER HEADING 
                                 <tr style="height:28px;">
                                     <td colspan="100%"
                                         style="
@@ -394,7 +438,7 @@
                                     </td>
                                 </tr>
 
-                                <!-- PRODUCT LINES -->
+                            
                                 <t t-foreach="grp and grp[1] or []" t-as="line">
                                     <t t-if="not line.display_type 
                             and line.product_id 
@@ -475,7 +519,9 @@
 
                             </t>
 
-                        </tbody>
+                        </tbody> -->
+
+                        
 
 
                         <!-- Iterate over all invoice lines -->
