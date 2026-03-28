@@ -21,7 +21,7 @@ class DescriptionSelectWizard(models.TransientModel):
     line_ids = fields.Many2many(
     "account.move.line",
     string="Select Products",
-    domain="[('move_id', '=', active_id)]"
+    
 )
 
     output_format = fields.Selection(
@@ -273,10 +273,12 @@ class DescriptionSelectWizard(models.TransientModel):
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
-
-        active_ids = self.env.context.get("active_ids")
-        if active_ids:
-            invoice = self.env["account.move"].browse(active_ids[0])
+    
+        active_id = self.env.context.get("active_id")
+    
+        if active_id:
+            invoice = self.env["account.move"].browse(active_id)
+    
             res["line_ids"] = [(6, 0, invoice.invoice_line_ids.ids)]
-
+    
         return res
