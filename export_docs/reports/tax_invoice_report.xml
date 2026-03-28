@@ -489,7 +489,7 @@
 
                                 <!-- PRODUCTS UNDER BUYER ORDER -->
                                 <t t-foreach="grp[1]" t-as="line">
-                                    <t t-if="line.show_in_invoice_print">
+                                    <t t-if="line.show_in_invoice">
                                     <tr>
                                         <td class="text-center">
                                             <t t-esc="sr" />
