@@ -335,19 +335,16 @@
                         </tr>
                     </table>
                     <!-- INIT -->
-<t t-set="grouped_lines" t-value="{}" />
-
-<!-- LOOP -->
-<t t-foreach="o.invoice_line_ids" t-as="l">
+<t t-foreach="o.invoice_line_ids" t-as="line">
     <t t-if="line.product_id and line.product_id.type != 'service'">
 
         <t t-set="bo"
-            t-value="(l.sale_line_ids and l.sale_line_ids[0].order_id.buyer_order_no) or 'NO BUYER ORDER'" />
+            t-value="(line.sale_line_ids and line.sale_line_ids[0].order_id and line.sale_line_ids[0].order_id.buyer_order_no) or 'NO BUYER ORDER'" />
 
         <t t-set="current" t-value="grouped_lines.get(bo, [])" />
 
         <t t-set="grouped_lines"
-            t-value="dict(grouped_lines, **{bo: current + [l]})" />
+            t-value="dict(grouped_lines, **{bo: current + [line]})" />
 
     </t>
 </t>
