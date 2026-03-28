@@ -336,26 +336,25 @@
                     </table>
                     <t t-set="grouped_lines" t-value="{}" />
 
-                    <t t-foreach="o.invoice_line_ids" t-as="line">
-                        <t
-                            t-if="line.display_type == False 
-                            and line.product_id 
-                            and line.product_id.type != 'service'">
+                        <t t-foreach="o.invoice_line_ids" t-as="line">
+                            <t t-if="line.display_type == False 
+                                and line.product_id 
+                                and line.product_id.type != 'service'">
 
-                            <t t-set="bo"
-                                t-value="
-                                (line.sale_line_ids
-                                and line.sale_line_ids[0].order_id.buyer_order_no)
-                                or 'NO BUYER ORDER'
-                            " />
+                                <t t-set="bo"
+                                    t-value="
+                                        (line.sale_line_ids and line.sale_line_ids[0].order_id and line.sale_line_ids[0].order_id.buyer_order_no)
+                                        or 'NO BUYER ORDER'
+                                    " />
 
-                            <t t-set="current" t-value="grouped_lines.get(bo, [])" />
+                                <t t-if="bo">
+                                    <t t-set="current" t-value="grouped_lines.get(bo, [])" />
+                                    <t t-set="grouped_lines"
+                                        t-value="dict(grouped_lines, **{bo: current + [line]})" />
+                                </t>
 
-                            <t t-set="grouped_lines"
-                                t-value="dict(grouped_lines, **{bo: current + [line]})" />
-
+                            </t>
                         </t>
-                    </t>
 
 
                     <!-- ================= ITEM TABLE ================= -->
@@ -387,7 +386,7 @@
                             <t t-set="sr" t-value="1" />
 
                             <!-- BUYER ORDER LOOP -->
-                            <t t-foreach="o.invoice_line_ids" t-as="line">
+                            <t t-foreach="grouped_lines.items() or []" t-as="grp">
 
                                 <!-- BUYER ORDER HEADING -->
                                 <tr style="height:28px;">
@@ -399,12 +398,12 @@
                                             vertical-align:middle;
                                             border:1px solid #000;
                                         ">
-                                        Buyer Order No : <t t-esc="grp[0]" />
+                                        Buyer Order No : <t t-esc="grp and grp[0] or ''"/> />
                                     </td>
                                 </tr>
 
                                 <!-- PRODUCT LINES -->
-                                <t t-foreach="grp[1]" t-as="line">
+                                <t t-foreach="grp and grp[1] or []" t-as="line">
                                     <t
                                         t-if="line.display_type == False 
                                     and line.product_id 
