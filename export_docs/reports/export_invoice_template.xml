@@ -340,7 +340,7 @@
 
 <!-- BUILD GROUP -->
 <t t-foreach="o.invoice_line_ids" t-as="line">
-    <t t-if="line.show_in_invoice and line.product_id and line.product_id.type != 'service'">
+   <t t-if="(not selected_ids or line.id in selected_ids) and line.product_id and line.product_id.type != 'service'">
 
         <t t-set="bo"
             t-value="(line.sale_line_ids and line.sale_line_ids[0].order_id and line.sale_line_ids[0].order_id.buyer_order_no) or 'NO BUYER ORDER'" />
@@ -380,7 +380,7 @@
                         <tbody>
 
                             <t t-set="sr" t-value="1" />
-                                <t t-set="selected_ids" t-value="selected_ids or []"/>
+                              
                             <!-- BUYER ORDER LOOP -->
                             <t t-foreach="grouped_lines.items() or []" t-as="grp">
 
@@ -399,8 +399,9 @@
                                 </tr>
 
                                 <!-- PRODUCT LINES -->
+                                <t t-set="selected_ids" t-value="wiz.get('selected_line_ids', [])"/>
                                 <t t-foreach="grp and grp[1] or []" t-as="line">
-                                    <t t-if="line.show_in_invoice and line.product_id and line.product_id.type != 'service'">
+                                   <t t-if="(not selected_ids or line.id in selected_ids) and line.product_id and line.product_id.type != 'service'">
                                         <tr>
                                             <td class="text-center">
                                                 <t t-esc="sr" />
@@ -485,7 +486,7 @@
                             <t t-set="row_index" t-value="0" />
 
                             <t t-foreach="o.invoice_line_ids" t-as="line">
-                               <t t-if="line.show_in_invoice and line.product_id and line.product_id.type != 'service'">
+                               <t t-set="selected_ids" t-value="wiz.get('selected_line_ids', [])"/>
 
                                     <t t-set="row_index" t-value="row_index + 1" />
 
