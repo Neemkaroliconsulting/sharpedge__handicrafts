@@ -387,7 +387,7 @@
                             <t t-set="sr" t-value="1" />
 
                             <!-- BUYER ORDER LOOP -->
-                            <t t-foreach="grouped_lines.items()" t-as="grp">
+                            <t t-foreach="o.invoice_line_ids" t-as="line">
 
                                 <!-- BUYER ORDER HEADING -->
                                 <tr style="height:28px;">
