@@ -337,7 +337,7 @@
 
                     <t t-set="grouped_lines" t-value="{}" />
 
-                    <t t-foreach="o.invoice_line_ids" t-as="line">
+                   
                          <t t-foreach="o.invoice_line_ids" t-as="line">
                                 <t t-if="line.display_type == False 
                                     and line.product_id 
