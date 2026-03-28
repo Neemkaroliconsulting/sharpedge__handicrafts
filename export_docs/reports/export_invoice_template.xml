@@ -335,6 +335,10 @@
                         </tr>
                     </table>
                     <!-- INIT -->
+<!-- INIT -->
+<t t-set="grouped_lines" t-value="{}" />
+
+<!-- BUILD GROUP -->
 <t t-foreach="o.invoice_line_ids" t-as="line">
     <t t-if="line.product_id and line.product_id.type != 'service'">
 
@@ -348,7 +352,6 @@
 
     </t>
 </t>
-
 
                     <!-- ================= ITEM TABLE ================= -->
                     <t t-set="row_index" t-value="0" />
@@ -482,7 +485,7 @@
                             <t t-set="row_index" t-value="0" />
 
                             <t t-foreach="o.invoice_line_ids" t-as="line">
-                                <t t-if="l.product_id and l.product_id.type != 'service'">
+                               <t t-if="line.product_id and line.product_id.type != 'service'">
 
                                     <t t-set="row_index" t-value="row_index + 1" />
 
