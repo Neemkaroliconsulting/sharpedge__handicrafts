@@ -207,7 +207,9 @@
                             </t>
                         </t>
                     </t>
-
+                        <t t-esc="line.name"/> -
+<t t-esc="line.show_in_invoice"/>
+<br/>
 
                     <!-- ================= HEADER ================= -->
                     <table>
