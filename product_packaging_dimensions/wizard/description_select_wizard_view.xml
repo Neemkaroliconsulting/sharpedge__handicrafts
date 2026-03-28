@@ -14,8 +14,11 @@
                         <field name="description_mode" widget="radio" />
                           <field name="output_format" widget="radio"/>
                     </group>
+                    <group> 
 
-                    <group><field name="line_ids" widget="many2many_checkboxes"/></group>
+                    <field name="line_ids"
+       widget="many2many_checkboxes"
+       options="{'no_create': True, 'no_open': True}"/></group>
 
                     <group>
                         <field name="show_pcs_per_box" />
