@@ -74,7 +74,9 @@ class DescriptionSelectWizard(models.TransientModel):
             invoice = self.env["account.move"].browse(active_id)
 
             # ✔ ONLY CURRENT INVOICE LINES
-            lines = invoice.invoice_line_ids.filtered(lambda l: l.product_id)
+            lines = invoice.invoice_line_ids.filtered(
+            lambda l: l.product_id and not l.tax_line_id and not l.display_type
+        )
 
             res["line_ids"] = [(6, 0, lines.ids)]
 
