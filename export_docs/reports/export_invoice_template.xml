@@ -491,10 +491,9 @@
                                     <t t-set="row_index" t-value="row_index + 1" />
 
                                 </t>
-                            </t>
-
                         </tbody>
                     </table>
+                         
 
                     <t t-set="net_amount"
                         t-value="product_total" />
