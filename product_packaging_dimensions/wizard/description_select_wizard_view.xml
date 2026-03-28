@@ -15,6 +15,8 @@
                           <field name="output_format" widget="radio"/>
                     </group>
 
+                    <group><field name="line_ids" widget="many2many_checkboxes"/></group>
+
                     <group>
                         <field name="show_pcs_per_box" />
                         <field name="show_total_qty" />
