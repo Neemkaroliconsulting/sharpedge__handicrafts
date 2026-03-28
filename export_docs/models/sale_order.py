@@ -361,14 +361,14 @@ class AccountMove(models.Model):
     )
 
     def _post(self, soft=True):
-    res = super()._post(soft)
-
-    for move in self:
-        for line in move.invoice_line_ids:
-            if line.sale_line_ids:
-                line.show_in_invoice = line.sale_line_ids[0].show_in_invoice
-
-    return res
+        res = super()._post(soft)
+    
+        for move in self:
+            for line in move.invoice_line_ids:
+                if line.sale_line_ids:
+                    line.show_in_invoice = line.sale_line_ids[0].show_in_invoice
+    
+        return res
 
     @api.model
     def create(self, vals):
