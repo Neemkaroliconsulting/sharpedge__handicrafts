@@ -501,7 +501,7 @@
                                  and (line.show_in_invoice or not line.sale_line_ids)">
 
                                     <t t-set="row_index" t-value="row_index + 1" />
-                                </t>
+                              
                             </t>
 
                         </tbody>
