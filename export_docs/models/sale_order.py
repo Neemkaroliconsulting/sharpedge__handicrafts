@@ -406,6 +406,7 @@ class AccountMove(models.Model):
             "context": {
                 "active_model": "account.move",
                 "active_ids": self.ids,
+                "active_id": self.id,
                 "report_type": "tax",
             },
         }
@@ -420,6 +421,7 @@ class AccountMove(models.Model):
             "context": {
                 "active_model": "account.move",
                 "active_ids": self.ids,
+                "active_id": self.id,
                 "report_type": "export",
             },
         }
@@ -453,6 +455,7 @@ class AccountMove(models.Model):
             "context": {
                 "active_model": "account.move",
                 "active_ids": self.ids,
+                "active_id": self.id,
                 "report_type": "export",
             },
         }
