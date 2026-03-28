@@ -19,12 +19,17 @@ class DescriptionSelectWizard(models.TransientModel):
         required=True,
     )
 
-    # ✅ PRODUCTS (IMPORTANT)
+    # ==================================================
+    # ✅ PRODUCTS (ONLY CURRENT INVOICE)
+    # ==================================================
     line_ids = fields.Many2many(
         "account.move.line",
         string="Select Products",
     )
 
+    # ==================================================
+    # OUTPUT
+    # ==================================================
     output_format = fields.Selection(
         [
             ('pdf', 'PDF'),
@@ -56,7 +61,7 @@ class DescriptionSelectWizard(models.TransientModel):
     show_net_cif = fields.Boolean("Net CI&F")
 
     # ==================================================
-    # ✅ MAIN FIX (IMPORTANT)
+    # 🔥 MAIN FIX (ONLY CURRENT INVOICE DATA LOAD)
     # ==================================================
     @api.model
     def default_get(self, fields):
@@ -67,8 +72,10 @@ class DescriptionSelectWizard(models.TransientModel):
         if active_id:
             invoice = self.env["account.move"].browse(active_id)
 
-            # 🔥 ONLY CURRENT INVOICE LINES
-            res["line_ids"] = [(6, 0, invoice.invoice_line_ids.ids)]
+            # ✔ ONLY CURRENT INVOICE LINES
+            lines = invoice.invoice_line_ids.filtered(lambda l: l.product_id)
+
+            res["line_ids"] = [(6, 0, lines.ids)]
 
         return res
 
