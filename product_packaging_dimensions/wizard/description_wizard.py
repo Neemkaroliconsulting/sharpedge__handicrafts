@@ -23,9 +23,10 @@ class DescriptionSelectWizard(models.TransientModel):
     # ✅ PRODUCTS (ONLY CURRENT INVOICE)
     # ==================================================
     line_ids = fields.Many2many(
-        "account.move.line",
-        string="Select Products",
-    )
+    "account.move.line",
+    string="Select Products",
+    domain="[('move_id', '=', context.get('active_id'))]"
+)
 
     # ==================================================
     # OUTPUT
