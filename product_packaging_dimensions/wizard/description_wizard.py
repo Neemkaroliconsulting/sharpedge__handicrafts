@@ -18,6 +18,10 @@ class DescriptionSelectWizard(models.TransientModel):
         default="export",
         required=True,
     )
+    line_ids = fields.Many2many(
+    "account.move.line",
+    string="Select Products"
+)
 
     output_format = fields.Selection(
         [
@@ -119,6 +123,7 @@ class DescriptionSelectWizard(models.TransientModel):
             "show_net_amount": self.show_net_amount, 
             "show_net_cf": self.show_net_cf, 
             "show_net_cif": self.show_net_cif,
+            "selected_line_ids": self.line_ids.ids
         }
 
         # ================= PDF =================
@@ -263,3 +268,14 @@ class DescriptionSelectWizard(models.TransientModel):
         return self.env.ref(xml_id).with_context(
             wizard_data=wizard_data
         ).report_action(active_ids)
+    
+    @api.model
+    def default_get(self, fields):
+        res = super().default_get(fields)
+
+        active_ids = self.env.context.get("active_ids")
+        if active_ids:
+            invoice = self.env["account.move"].browse(active_ids[0])
+            res["line_ids"] = [(6, 0, invoice.invoice_line_ids.ids)]
+
+        return res
