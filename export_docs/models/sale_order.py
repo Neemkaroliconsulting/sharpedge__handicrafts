@@ -591,37 +591,37 @@ class ExportInvoiceReport(models.AbstractModel):
     _name = "report.export_docs.export_invoice_template"
 
     def _get_report_values(self, docids, data=None):
-        # If data is None (e.g. direct print), fetch all lines
         docs = self.env["account.move"].browse(docids)
+        data = data or {}
         
-        # We MUST ensure 'data' is passed to the QWeb context
-        # Otherwise, t-if="data.get(...)" fails silently
+        # We prepare grouped data but keep a 'raw' fallback
+        res_grouped = {}
+        for inv in docs:
+            selected_ids = data.get('selected_line_ids', [])
+            
+            # Filter lines based on selection
+            if selected_ids:
+                lines = inv.invoice_line_ids.filtered(lambda l: l.id in selected_ids)
+            else:
+                lines = inv.invoice_line_ids.filtered(lambda l: not l.display_type and l.product_id)
+            
+            # Grouping Logic
+            grouped = {}
+            for line in lines:
+                # Get Buyer Order No from Sale Order linked to the invoice line
+                sale_order = line.sale_line_ids.order_id[:1]
+                key = sale_order.buyer_order_no if sale_order and sale_order.buyer_order_no else "Standard"
+                grouped.setdefault(key, []).append(line)
+            
+            res_grouped[inv.id] = grouped
+
         return {
-            'doc_ids': docs.ids,
+            'doc_ids': docids,
             'doc_model': 'account.move',
             'docs': docs,
-            'data': data or {},  # This makes the wizard choices visible
-            'grouped_lines': {
-                inv.id: self._group_lines_by_buyer_order(inv, data.get('selected_line_ids') if data else [])
-                for inv in docs
-            }
+            'data': data,
+            'grouped_lines': res_grouped,
         }
-
-    def _group_lines_by_buyer_order(self, invoice, selected_ids=None):
-        grouped = {}
-        # Filter lines: only those selected in the wizard OR all if none selected
-        lines = invoice.invoice_line_ids.filtered(
-            lambda l: l.product_id and not l.display_type
-        )
-        
-        if selected_ids:
-            lines = lines.filtered(lambda l: l.id in selected_ids)
-
-        for line in lines:
-            # Group by Buyer Order No or fallback
-            bo = line.sale_line_ids[0].order_id.buyer_order_no if line.sale_line_ids and line.sale_line_ids[0].order_id.buyer_order_no else 'N/A'
-            grouped.setdefault(bo, []).append(line)
-        return grouped
 
 
 # =========================================================
