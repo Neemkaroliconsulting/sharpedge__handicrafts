@@ -25,40 +25,85 @@
     </record>
 
     <!-- ================= TEMPLATE ================= -->
-<template id="export_invoice_template" t-name="export_docs.export_invoice_template">
-<t t-call="web.basic_layout">
+<template id="export_invoice_template">
+    <t t-call="web.basic_layout">
+        <t t-foreach="docs" t-as="o">
+            <div class="page" style="font-size: 12px;">
+                <h2 class="text-center">EXPORT INVOICE</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <strong>Exporter:</strong> <t t-esc="o.company_id.name"/><br/>
+                        <strong>Buyer Order No:</strong> <t t-esc="o.buyer_order_no"/>
+                    </div>
+                    <div class="col-6 text-right">
+                        <strong>Invoice No:</strong> <t t-esc="o.name"/><br/>
+                        <strong>Date:</strong> <t t-esc="o.invoice_date"/>
+                    </div>
+                </div>
 
-<t t-foreach="docs" t-as="o">
+                <table class="table table-bordered" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Product Description</th>
+                            <th class="text-right">Quantity</th>
+                            <th class="text-right">Rate</th>
+                            <t t-if="data.get('show_net_amount')">
+                                <th class="text-right">Amount</th>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="grouped_lines.get(o.id, {})" t-as="group">
+                            <t t-if="data.get('group_by') == 'buyer_order'">
+                                <tr style="background-color: #f2f2f2; font-weight: bold;">
+                                    <td colspan="10">Order: <t t-esc="group"/></td>
+                                </tr>
+                            </t>
 
-    <div class="page">
+                            <t t-foreach="grouped_lines[o.id][group]" t-as="line">
+                                <tr>
+                                    <td>
+                                        <t t-if="data.get('description_mode') == 'buyer'">
+                                            <t t-esc="line.product_id.name"/> (Buyer Ref)
+                                        </t>
+                                        <t t-else="">
+                                            <t t-esc="line.name"/>
+                                        </t>
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="line.quantity"/> <t t-esc="line.product_uom_id.name"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="line.price_unit" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                    <t t-if="data.get('show_net_amount')">
+                                        <td class="text-right">
+                                            <t t-esc="line.price_subtotal" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
 
-        <h2>TEST EXPORT INVOICE</h2>
-
-        <table border="1" style="width:100%;">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Qty</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                <t t-foreach="o.invoice_line_ids" t-as="line">
-                    <tr>
-                        <td><t t-esc="line.product_id.name"/></td>
-                        <td><t t-esc="line.quantity"/></td>
-                        <td><t t-esc="line.price_subtotal"/></td>
-                    </tr>
-                </t>
-
-            </tbody>
-        </table>
-
-    </div>
-
-</t>
-</t>
+                <div class="row justify-content-end">
+                    <div class="col-4">
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Total Weight:</strong></td>
+                                <td class="text-right"><t t-esc="o.net_weight"/> Kg</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total CBM:</strong></td>
+                                <td class="text-right"><t t-esc="o.cbm_total"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </t>
 </template>
 </odoo>
