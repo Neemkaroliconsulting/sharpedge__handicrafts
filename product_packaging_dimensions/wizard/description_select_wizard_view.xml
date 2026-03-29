@@ -1,38 +1,44 @@
-This XML file does not appear to have any style information associated with it. The document tree is shown below.
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-<record id="view_description_select_wizard_form" model="ir.ui.view">
-<field name="name">description.select.wizard.form</field>
-<field name="model">description.select.wizard</field>
-<field name="arch" type="xml">
-<form string="Packing List Cum Invoice (Export Printing)">
-<group col="2">
-<group string="Format">
-<field name="report_type" widget="radio"/>
-</group>
-<group string="Item Description">
-<field name="description_mode" widget="radio"/>
-<field name="output_format" widget="radio"/>
-</group>
-<group>
-<field name="line_ids" widget="many2many_checkboxes" options="{'no_create': True, 'no_open': True}"/>
-</group>
-<group>
-<field name="show_pcs_per_box"/>
-<field name="show_total_qty"/>
-<field name="show_dimensions"/>
-</group>
-</group>
-<group string="Summary (Show on Print)" col="2">
-<!--  <field name="show_pcs_per_box"/>  -->
-<field name="show_net_amount"/>
-<field name="show_net_cf"/>
-<field name="show_net_cif"/>
-</group>
-<footer>
-<button name="action_print_report" string="Print" type="object" class="btn-primary"/>
-<button string="Cancel" special="cancel"/>
-</footer>
-</form>
-</field>
-</record>
+    <record id="view_description_select_wizard_form" model="ir.ui.view">
+        <field name="name">description.select.wizard.form</field>
+        <field name="model">description.select.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Packing List Cum Invoice (Export Printing)">
+                <group col="2">
+                    <group string="Format">
+                        <field name="report_type" widget="radio"/>
+                    </group>
+
+                    <group string="Item Description">
+                        <field name="description_mode" widget="radio"/>
+                        <field name="output_format" widget="radio"/>
+                    </group>
+
+                    <group>
+                        <field name="line_ids" widget="many2many_checkboxes"
+                               options="{'no_create': True, 'no_open': True}"/>
+                    </group>
+
+                    <group>
+                        <field name="show_pcs_per_box"/>
+                        <field name="show_total_qty"/>
+                        <field name="show_dimensions"/>
+                    </group>
+                </group>
+
+                <group string="Summary (Show on Print)" col="2">
+                    <field name="show_net_amount"/>
+                    <field name="show_net_cf"/>
+                    <field name="show_net_cif"/>
+                </group>
+
+                <footer>
+                    <button name="action_print_report" string="Print"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
 </odoo>
