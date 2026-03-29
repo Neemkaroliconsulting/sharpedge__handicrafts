@@ -91,13 +91,11 @@ class DescriptionSelectWizard(models.TransientModel):
         wizard_data = {
             "selected_line_ids": self.line_ids.ids,
             "show_net_amount": self.show_net_amount,
-            "show_net_cf": self.show_net_cf,
-            "show_net_cif": self.show_net_cif,
         }
     
         return self.env.ref(
             "export_docs.action_export_invoice_report"
         ).report_action(
-            active_ids,
-            data=wizard_data
+            self.env['account.move'].browse(active_ids),   # 🔥 FIX 1
+            data=wizard_data                               # 🔥 FIX 2
         )
