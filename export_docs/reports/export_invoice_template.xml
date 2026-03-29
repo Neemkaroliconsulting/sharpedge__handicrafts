@@ -29,117 +29,45 @@
     <t t-call="web.basic_layout">
         <t t-foreach="docs" t-as="o">
 
-            <div class="page" style="font-size: 12px;">
-                <h2 class="text-center">EXPORT INVOICE</h2>
-                
-                <!-- HEADER -->
-                <div class="row mb-4">
-                    <div class="col-6">
-                        <strong>Exporter:</strong> <t t-esc="o.company_id.name"/><br/>
-                        <strong>Buyer Order No:</strong> <t t-esc="o.buyer_order_no"/>
-                    </div>
-                    <div class="col-6 text-right">
-                        <strong>Invoice No:</strong> <t t-esc="o.name"/><br/>
-                        <strong>Date:</strong> <t t-esc="o.invoice_date"/>
-                    </div>
-                </div>
+            <div class="page">
+                <h2>EXPORT INVOICE</h2>
 
-                <!-- TABLE -->
+                <!-- DEBUG -->
+                <div>Invoice: <t t-esc="o.name"/></div>
+                <div>Total Lines: <t t-esc="len(o.invoice_line_ids)"/></div>
+
                 <table class="table table-bordered" style="width:100%;">
                     <thead>
                         <tr>
-                            <th>Product Description</th>
-                            <th class="text-right">Quantity</th>
-                            <th class="text-right">Rate</th>
-                            <t t-if="data.get('show_net_amount')">
-                                <th class="text-right">Amount</th>
-                            </t>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Price</th>
                         </tr>
                     </thead>
 
                     <tbody>
 
-                        <!-- 🔥 SAFE GROUP FETCH -->
-                        <t t-set="groups" t-value="grouped_lines.get(o.id) or {}"/>
+                        <!-- 🔥 DIRECT LOOP -->
+                        <t t-foreach="o.invoice_line_ids" t-as="line">
 
-                        <!-- 🔥 MAIN LOOP -->
-                        <t t-if="groups">
-                            <t t-foreach="groups.items()" t-as="grp">
-
-                                <!-- GROUP HEADER -->
-                                <tr>
-                                    <td colspan="4">
-                                        <strong>Buyer Order: <t t-esc="grp[0]"/></strong>
-                                    </td>
-                                </tr>
-
-                                <!-- LINES -->
-                                <t t-foreach="grp[1]" t-as="line">
-
-                                    <tr>
-                                        <td>
-                                            <t t-if="data.get('description_mode') == 'buyer'">
-                                                <t t-esc="line.product_id.name"/> (Buyer Ref)
-                                            </t>
-                                            <t t-else="">
-                                                <t t-esc="line.name"/>
-                                            </t>
-                                        </td>
-
-                                        <td class="text-right">
-                                            <t t-esc="line.quantity"/>
-                                            <t t-esc="line.product_uom_id.name"/>
-                                        </td>
-
-                                        <td class="text-right">
-                                            <t t-esc="line.price_unit"/>
-                                        </td>
-
-                                        <t t-if="data.get('show_net_amount')">
-                                            <td class="text-right">
-                                                <t t-esc="line.price_subtotal"/>
-                                            </td>
-                                        </t>
-                                    </tr>
-
-                                </t>
-
-                            </t>
-                        </t>
-
-                        <!-- 🔥 FALLBACK (kabhi grouping fail ho) -->
-                        <t t-else="">
-                            <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.product_id and not l.display_type)" t-as="line">
+                            <t t-if="line.product_id and not line.display_type">
 
                                 <tr>
                                     <td><t t-esc="line.name"/></td>
-                                    <td class="text-right"><t t-esc="line.quantity"/></td>
-                                    <td class="text-right"><t t-esc="line.price_unit"/></td>
+                                    <td><t t-esc="line.quantity"/></td>
+                                    <td><t t-esc="line.price_unit"/></td>
                                 </tr>
 
                             </t>
+
                         </t>
 
                     </tbody>
                 </table>
 
-                <!-- TOTAL -->
-                <div class="row justify-content-end">
-                    <div class="col-4">
-                        <table class="table table-sm">
-                            <tr>
-                                <td><strong>Total Weight:</strong></td>
-                                <td class="text-right"><t t-esc="o.net_weight"/> Kg</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Total CBM:</strong></td>
-                                <td class="text-right"><t t-esc="o.cbm_total"/></td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
             </div>
+
         </t>
     </t>
-</template></odoo>
+</template>
+</odoo>
