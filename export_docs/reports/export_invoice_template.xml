@@ -25,16 +25,16 @@
     </record>
 
     <!-- ================= TEMPLATE ================= -->
-   <template id="export_invoice_template" t-name="export_docs.export_invoice_template">
+  <template id="export_invoice_template" t-name="export_docs.export_invoice_template">
 <t t-call="web.basic_layout">
 
 <t t-foreach="docs" t-as="o">
 
-    <!-- ================= WIZARD DATA ================= -->
+    <!-- ================= SAFE DATA ================= -->
     <t t-set="wiz" t-value="data or {}"/>
     <t t-set="selected_ids" t-value="wiz.get('selected_line_ids', [])"/>
 
-    <!-- ================= FILTERED LINES ================= -->
+    <!-- ================= SAFE FILTER ================= -->
     <t t-set="lines"
        t-value="o.invoice_line_ids.filtered(
            lambda l:
@@ -43,7 +43,7 @@
                and (not selected_ids or l.id in selected_ids)
        )"/>
 
-    <!-- ================= TOTALS ================= -->
+    <!-- ================= SAFE TOTAL ================= -->
     <t t-set="product_total"
        t-value="sum(lines.mapped('price_subtotal'))"/>
 
@@ -82,8 +82,8 @@
 
         <h2 style="text-align:center;">EXPORT INVOICE</h2>
 
-        <!-- ================= ITEM TABLE ================= -->
-        <table class="table table-bordered" style="width:100%;">
+        <!-- ================= TABLE ================= -->
+        <table border="1" style="width:100%; border-collapse:collapse;">
             <thead>
                 <tr>
                     <th>Sr</th>
@@ -98,51 +98,56 @@
 
             <tbody>
 
-                <!-- GROUPING -->
-                <t t-foreach="grouped_lines[o.id].items()" t-as="grp">
+                <!-- ================= SAFE GROUPING ================= -->
+                <t t-if="grouped_lines.get(o.id)">
+                    
+                    <t t-foreach="grouped_lines.get(o.id, {}).items()" t-as="grp">
 
-                    <!-- GROUP HEADER -->
-                    <tr style="background:#eee;">
-                        <td colspan="7">
-                            <b>Buyer Order: <t t-esc="grp[0]"/></b>
-                        </td>
-                    </tr>
-
-                    <!-- LINES -->
-                    <t t-set="sr" t-value="1"/>
-
-                    <t t-foreach="grp[1]" t-as="line">
-
-                        <tr>
-                            <td><t t-esc="sr"/></td>
-
-                            <td>
-                                <t t-esc="line.product_id.default_code or ''"/>
-                            </td>
-
-                            <td>
-                                <t t-esc="line.name"/>
-                            </td>
-
-                            <td>
-                                <t t-esc="line.product_id.l10n_in_hsn_code or ''"/>
-                            </td>
-
-                            <td>
-                                <t t-esc="line.quantity"/>
-                            </td>
-
-                            <td>
-                                <t t-esc="line.price_unit"/>
-                            </td>
-
-                            <td>
-                                <t t-esc="line.price_subtotal"/>
+                        <!-- GROUP HEADER -->
+                        <tr style="background:#eee;">
+                            <td colspan="7">
+                                <b>Buyer Order: <t t-esc="grp[0]"/></b>
                             </td>
                         </tr>
 
-                        <t t-set="sr" t-value="sr + 1"/>
+                        <t t-set="sr" t-value="1"/>
 
+                        <!-- LINES -->
+                        <t t-foreach="grp[1] or []" t-as="line">
+                            <tr>
+                                <td><t t-esc="sr"/></td>
+                                <td><t t-esc="line.product_id.default_code or ''"/></td>
+                                <td><t t-esc="line.name"/></td>
+                                <td><t t-esc="line.product_id.l10n_in_hsn_code or ''"/></td>
+                                <td><t t-esc="line.quantity"/></td>
+                                <td><t t-esc="line.price_unit"/></td>
+                                <td><t t-esc="line.price_subtotal"/></td>
+                            </tr>
+
+                            <t t-set="sr" t-value="sr + 1"/>
+                        </t>
+
+                    </t>
+
+                </t>
+
+                <!-- ================= FALLBACK (NO GROUP) ================= -->
+                <t t-if="not grouped_lines.get(o.id)">
+
+                    <t t-set="sr" t-value="1"/>
+
+                    <t t-foreach="lines" t-as="line">
+                        <tr>
+                            <td><t t-esc="sr"/></td>
+                            <td><t t-esc="line.product_id.default_code or ''"/></td>
+                            <td><t t-esc="line.name"/></td>
+                            <td><t t-esc="line.product_id.l10n_in_hsn_code or ''"/></td>
+                            <td><t t-esc="line.quantity"/></td>
+                            <td><t t-esc="line.price_unit"/></td>
+                            <td><t t-esc="line.price_subtotal"/></td>
+                        </tr>
+
+                        <t t-set="sr" t-value="sr + 1"/>
                     </t>
 
                 </t>
@@ -150,7 +155,7 @@
             </tbody>
         </table>
 
-        <!-- ================= TOTALS ================= -->
+        <!-- ================= TOTAL ================= -->
         <br/>
 
         <table style="width:40%; float:right;">
