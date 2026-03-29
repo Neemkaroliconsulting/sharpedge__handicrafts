@@ -26,47 +26,37 @@
 
     <!-- ================= TEMPLATE ================= -->
 <template id="export_invoice_template">
-    <t t-call="web.basic_layout">
-        <t t-foreach="docs" t-as="o">
+    <t t-name="export_docs.export_invoice_template">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
 
-            <div class="page">
-                <h2>EXPORT INVOICE</h2>
+                <div class="page">
+                    <h2>EXPORT INVOICE</h2>
 
-                <!-- DEBUG -->
-                <div>Invoice: <t t-esc="o.name"/></div>
-                <div>Total Lines: <t t-esc="len(o.invoice_line_ids)"/></div>
+                    <div>Invoice: <t t-esc="o.name"/></div>
 
-                <table class="table table-bordered" style="width:100%;">
-                    <thead>
+                    <table border="1" width="100%">
                         <tr>
                             <th>Product</th>
                             <th>Qty</th>
                             <th>Price</th>
                         </tr>
-                    </thead>
 
-                    <tbody>
-
-                        <!-- 🔥 DIRECT LOOP -->
                         <t t-foreach="o.invoice_line_ids" t-as="line">
-
                             <t t-if="line.product_id and not line.display_type">
-
                                 <tr>
                                     <td><t t-esc="line.name"/></td>
                                     <td><t t-esc="line.quantity"/></td>
                                     <td><t t-esc="line.price_unit"/></td>
                                 </tr>
-
                             </t>
-
                         </t>
 
-                    </tbody>
-                </table>
+                    </table>
 
-            </div>
+                </div>
 
+            </t>
         </t>
     </t>
 </template>
