@@ -19,13 +19,6 @@
                         <field name="output_format" widget="radio"/>
                     </group>
 
-                    <!-- ================= GROUPING (🔥 NEW) ================= -->
-                    <group string="Grouping">
-                        <field name="group_by" widget="radio"/>
-                    </group>
-
-                </group>
-
                 <!-- ================= PRODUCT SELECTION ================= -->
                 <group string="Select Products">
                     <field name="line_ids"
