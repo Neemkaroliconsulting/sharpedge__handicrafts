@@ -25,635 +25,188 @@
     </record>
 
     <!-- ================= TEMPLATE ================= -->
-    <template id="export_invoice_template" t-name="export_docs.export_invoice_template">
-        <t t-call="web.basic_layout">
+   <template id="export_invoice_template" t-name="export_docs.export_invoice_template">
+<t t-call="web.basic_layout">
 
-            <t t-foreach="docs" t-as="o">
-                <t t-set="wiz" t-value="o._context.get('wizard_data', {})" />
+<t t-foreach="docs" t-as="o">
 
+    <!-- ================= WIZARD DATA ================= -->
+    <t t-set="wiz" t-value="data or {}"/>
+    <t t-set="selected_ids" t-value="wiz.get('selected_line_ids', [])"/>
 
-                <!-- ================= CALCULATIONS ================= -->
+    <!-- ================= FILTERED LINES ================= -->
+    <t t-set="lines"
+       t-value="o.invoice_line_ids.filtered(
+           lambda l:
+               l.product_id
+               and l.product_id.type != 'service'
+               and (not selected_ids or l.id in selected_ids)
+       )"/>
 
+    <!-- ================= TOTALS ================= -->
+    <t t-set="product_total"
+       t-value="sum(lines.mapped('price_subtotal'))"/>
 
-                <!-- 🔹 Invoice currency → Company currency conversion rate -->
-                <t t-set="inv_to_company_rate"
-                    t-value="o.currency_id._get_conversion_rate(
-                        o.currency_id,
-                        o.company_id.currency_id,
-                        o.company_id,
-                        o.invoice_date or o.date
-                    ) or 0.0" />
+    <t t-set="discount_amount"
+       t-value="sum(
+           (l.quantity * l.price_unit * l.discount) / 100
+           for l in lines
+       )"/>
 
-                <t t-set="insurance_total"
-                    t-value="
-                        sum(
-                            o.invoice_line_ids.filtered(
-                                lambda l:
-                                    l.product_id
-                                    and l.product_id.type == 'service'
-                                    and 'insurance' in (l.product_id.name or '').lower()
-                            ).mapped('price_subtotal')
-                        ) or 0.0
-                    " />
-
-                <!-- Freight total (service product named FREIGHT) -->
-                <t t-set="freight_total"
-                    t-value="
-                        sum(
-                            o.invoice_line_ids.filtered(
-                                lambda l:
-                                    l.product_id
-                                    and l.product_id.type == 'service'
-                                    and 'freight' in (l.product_id.name or '').lower()
-                            ).mapped('price_subtotal')
-                        ) or 0.0
-                    " />
-                <!-- DISCOUNT -->
-                <t t-set="discount_amount"
-                    t-value="
-       sum(
+    <t t-set="freight_total"
+       t-value="sum(
            o.invoice_line_ids.filtered(
-               lambda l: l.product_id and l.product_id.type != 'service'
-           ).mapped(
                lambda l:
-                   (l.quantity * l.price_unit * l.discount) / 100
-           )
-       ) or 0.0
-   " />
+                   l.product_id
+                   and l.product_id.type == 'service'
+                   and 'freight' in (l.product_id.name or '').lower()
+           ).mapped('price_subtotal')
+       )"/>
 
+    <t t-set="insurance_total"
+       t-value="sum(
+           o.invoice_line_ids.filtered(
+               lambda l:
+                   l.product_id
+                   and l.product_id.type == 'service'
+                   and 'insurance' in (l.product_id.name or '').lower()
+           ).mapped('price_subtotal')
+       )"/>
 
-                <!-- PRODUCT TOTAL -->
-                <t t-set="product_total"
-                    t-value="
-            sum(
-                o.invoice_line_ids.filtered(
-                    lambda l:
-                        l.product_id
-                        and l.product_id.type != 'service'
-                ).mapped('price_subtotal')
-            ) or 0.0
-        " />
+    <t t-set="net_amount" t-value="product_total"/>
+    <t t-set="net_cf" t-value="net_amount + freight_total"/>
+    <t t-set="net_cif" t-value="net_cf + insurance_total"/>
 
+    <!-- ================= PAGE ================= -->
+    <div class="page">
 
-                <!-- NET AMOUNT -->
-                <t t-set="net_amount"
-                    t-value="product_total" />
+        <h2 style="text-align:center;">EXPORT INVOICE</h2>
 
-                <!-- NET C&F -->
-                <t t-set="net_cf"
-                    t-value="net_amount + freight_total" />
+        <!-- ================= ITEM TABLE ================= -->
+        <table class="table table-bordered" style="width:100%;">
+            <thead>
+                <tr>
+                    <th>Sr</th>
+                    <th>Item</th>
+                    <th>Description</th>
+                    <th>HSN</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
 
-                <!-- NET CIF -->
-                <t t-set="net_cif"
-                    t-value="net_cf + insurance_total" />
+            <tbody>
 
+                <!-- GROUPING -->
+                <t t-foreach="grouped_lines[o.id].items()" t-as="grp">
 
-                <div class="page" style="font-size:12px;">
+                    <!-- GROUP HEADER -->
+                    <tr style="background:#eee;">
+                        <td colspan="7">
+                            <b>Buyer Order: <t t-esc="grp[0]"/></b>
+                        </td>
+                    </tr>
 
-                    <style>
+                    <!-- LINES -->
+                    <t t-set="sr" t-value="1"/>
 
-                        table.item-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        border: 1px solid #000; /* outer border */
-                        min-height: 00px; /* blank space */
-                        }
-
-                        /* HEADER: full border */
-                        table.item-table th {
-                        border: 1px solid #000;
-                        padding: 6px;
-                        font-weight: bold;
-                        text-align: center;
-                        }
-
-                        body, table, td, th {
-                        font-family:Times New Roman, serif;
-                        font-size: 16px;
-                        border-collapse: collapse;
-                        }
-
-                        .title{
-                        font-size: 25px;
-                        font-weight: bold;
-                        text-align: center;
-                        }
-
-
-                        .item-table td {
-                        padding: 4px;
-                        vertical-align: top;
-                        border: none; /* ❌ NO row lines */
-                        }
-
-
-                        table {
-                        width: 100%;
-                        }
-                        th, td {
-                        border: 1px solid #000;
-                        padding: 6px;
-                        vertical-align: top;
-                        }
-                        th {
-                        background: #f2f2f2;
-                        text-align: center;
-                        }
-                        .no-border td {
-                        border: none;
-                        }
-                        .text-right { text-align: right; }
-                        .text-center { text-align: center; }
-
-                        .item-row td {
-                        height: 32px;
-                        }
-                        .empty-row td {
-                        height: 32px;
-                        }
-                        table.item-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        border: 1px solid #000; /* outer border */
-                        min-height: 300px; /* blank space */
-                        }
-
-
-                        /* BODY: only left &amp; right borders */
-                        table.item-table td {
-                        border-left: 1px solid #000;
-                        border-right: 1px solid #000;
-                        border-top: none;
-                        border-bottom: none;
-                        padding: 6px;
-                        vertical-align: top;
-                        }
-
-
-                    </style>
-
-                    <!-- ================= TITLE ================= -->
-                    <div class="title">EXPORT INVOICE</div>
-
-                    <t t-set="buyer_orders" t-value="[]" />
-
-                    <t t-foreach="o.invoice_line_ids" t-as="l">
-                        <t t-foreach="l.sale_line_ids" t-as="sl">
-                            <t t-if="sl.order_id and sl.order_id.buyer_order_no">
-                                <t t-if="sl.order_id.buyer_order_no not in buyer_orders">
-                                    <t t-set="buyer_orders"
-                                        t-value="buyer_orders + [sl.order_id.buyer_order_no]" />
-                                </t>
-                            </t>
-                        </t>
-                    </t>
-
-                    <!-- ================= HEADER ================= -->
-                    <table>
-                        <tr>
-                            <td width="60%" style="vertical-align:top;">
-                                <strong>Exporter</strong>
-                                <br />
-
-                                <table width="100%" style="border:none;">
-                                    <tr>
-                                        <!-- LOGO -->
-                                        <td width="25%" style="vertical-align:top; border:none;">
-                                            <t t-if="o.company_id.logo">
-                                                <img t-att-src="image_data_uri(o.company_id.logo)"
-                                                    style="max-height:80px; max-width:120px;" />
-                                            </t>
-                                        </td>
-
-                                        <!-- COMPANY DETAILS -->
-                                        <td width="75%" style="vertical-align:top; border:none;">
-                                            <strong>
-                                                <t t-esc="o.company_id.name" />
-                                            </strong>
-                                            <br />
-
-                                            <t t-if="o.company_id.street">
-                                                <t t-esc="o.company_id.street" />
-                                                <br />
-                                            </t>
-
-                                            <t t-if="o.company_id.city">
-                                                <t t-esc="o.company_id.city" />
-                                            </t>
-
-                                            <t t-if="o.company_id.country_id">
-                                                <t t-if="o.company_id.city">, </t>
-                                                <t t-esc="o.company_id.country_id.name" />
-                                            </t>
-                                            <br />
-
-                                            <t t-if="o.company_id.vat">
-                                                <strong>GSTIN :</strong>
-                                                <t t-esc="o.company_id.vat" />
-                                            </t>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-
-
-                            <td width="40%">
-                                <strong>Invoice No :</strong>
-                                <t t-esc="o.name" />
-                                <br />
-                                <strong>Date :</strong>
-                                <t t-esc="o.invoice_date" />
-                                <br />
-                                <strong>Exporter Ref :</strong>
-                                <t t-esc="o.exporter_reference" />
-                                <br />
-                                <strong>Buyer Order No :</strong>
-                                <t t-esc="'/ '.join(buyer_orders)" />
-
-                            </td>
-                        </tr>
-                    </table>
-
-                    <!-- ================= PARTIES ================= -->
-                    <table>
-                        <tr>
-                            <td width="50%">
-                                <strong>Consignee</strong><br />
-                                <t t-esc="o.consignee_id.name" /><br />
-                                <t
-                                    t-esc="o.consignee_id.street" /><br />
-                                <t
-                                    t-esc="o.consignee_id.city" /> , <t
-                                    t-esc="o.consignee_id.country_id.name" />
-                            </td>
-                            <td width="50%">
-                                <strong>Buyer (if other than consignee)</strong>
-                                <br />
-                                <t t-esc="o.buyer_id.name" />
-                            </td>
-                        </tr>
-                    </table>
-
-                    <!-- ================= SHIPPING ================= -->
-                    <table>
-                        <tr>
-                            <td> Country of Origin<br />
-                                <strong>
-                                    <t t-esc="o.country_origin_id.name" />
-                                </strong>
-                            </td>
-                            <td> Final Destination<br />
-                                <strong>
-                                    <t t-esc="o.country_destination_id.name" />
-                                </strong>
-                            </td>
-                        </tr>
+                    <t t-foreach="grp[1]" t-as="line">
 
                         <tr>
-                            <td>Pre-Carriage By<br /><strong>
-                                    <t t-esc="o.pre_carriage_by" />
-                                </strong></td>
-                            <td>Place of Receipt<br /><strong>
-                                    <t t-esc="o.place_of_receipt" />
-                                </strong></td>
-                            <tr>
-                                <td>Port of Loading<br /><strong>
-                                        <t t-esc="o.port_loading" />
-                                    </strong></td>
-                                <td>Port of Discharge<br /><strong>
-                                        <t t-esc="o.port_discharge" />
-                                    </strong></td>
-                            </tr>
-                        </tr>
+                            <td><t t-esc="sr"/></td>
 
-                        <tr>
-                            <td colspan="2"> Terms of Delivery &amp; Payment<br />
-                                <t
-                                    t-esc="o.terms_delivery" /> / <t
-                                    t-esc="o.payment_terms_export" />
-                            </td>
-                        </tr>
-                    </table>
-                    <!-- INIT -->
-<!-- INIT -->
-<t t-set="grouped_lines" t-value="{}" />
-
-<!-- BUILD GROUP -->
-<t t-foreach="o.invoice_line_ids" t-as="line">
-   <t t-if="(not selected_ids or line.id in selected_ids) and line.product_id and line.product_id.type != 'service'">
-
-        <t t-set="bo"
-            t-value="(line.sale_line_ids and line.sale_line_ids[0].order_id and line.sale_line_ids[0].order_id.buyer_order_no) or 'NO BUYER ORDER'" />
-
-        <t t-set="current" t-value="grouped_lines.get(bo, [])" />
-
-        <t t-set="grouped_lines"
-            t-value="dict(grouped_lines, **{bo: current + [line]})" />
-
-    </t>
-</t>
-
-                    <!-- ================= ITEM TABLE ================= -->
-                    <t t-set="row_index" t-value="0" />
-                    <t t-set="max_rows_per_page" t-value="30" />
-                    <t t-set="total_lines" t-value="len(o.invoice_line_ids)" />
-
-                    <table class="item-table">
-                        <thead>
-                            <tr>
-                                <th width="5%">Sr</th>
-                                <th width="20%">Item Ref</th>
-                                <th width="35%">Description</th>
-                                <th>HSN</th>
-                                <th width="10%">Qty</th>
-                                <th width="15%"> Rate<br />
-                                     <t t-esc="o.currency_id.name" />
-                                </th>
-
-                                <th width="15%"> Amount<br />
-                                    <t t-esc="o.currency_id.name" />
-                                </th>
-
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            <t t-set="sr" t-value="1" />
-                              
-                            <!-- BUYER ORDER LOOP -->
-                            <t t-foreach="grouped_lines.items() or []" t-as="grp">
-
-                                <!-- BUYER ORDER HEADING -->
-                                <tr style="height:28px;">
-                                    <td colspan="100%"
-                                        style="
-                                            font-weight:bold;
-                                            background:#f2f2f2;
-                                            padding:6px;
-                                            vertical-align:middle;
-                                            border:1px solid #000;
-                                        ">
-                                        Buyer Order No : <t t-esc="grp and grp[0] or ''"/> />
-                                    </td>
-                                </tr>
-
-                                <!-- PRODUCT LINES -->
-                                <t t-set="selected_ids" t-value="wiz.get('selected_line_ids', [])"/>
-                                <t t-foreach="grp and grp[1] or []" t-as="line">
-                                   <t t-if="(not selected_ids or line.id in selected_ids) and line.product_id and line.product_id.type != 'service'">
-                                        <tr>
-                                            <td class="text-center">
-                                                <t t-esc="sr" />
-                                            </td>
-
-                                            <td>
-                                                <t t-set="tmpl"
-                                                    t-value="line.product_id.product_tmpl_id" />
-                                                <t t-set="partner" t-value="o.partner_id" />
-
-                                                <t t-set="mapping"
-                                                    t-value="tmpl.customer_sku_ids.filtered(
-                            lambda m: m.customer_id == partner
-                        )" />
-
-                                                <t
-                                                    t-if="wiz.get('description_mode') == 'buyer' and mapping">
-                                                    <t t-esc="mapping[0].buyer_sku" />
-                                                </t>
-                                                <t t-else="">
-                                                    <t t-esc="line.product_id.default_code or ''" />
-                                                </t>
-                                            </td>
-
-                                            <td>
-                                                <t t-set="tmpl"
-                                                    t-value="line.product_id.product_tmpl_id" />
-                                                <t t-set="partner" t-value="o.partner_id" />
-
-                                                <t t-set="mapping"
-                                                    t-value="tmpl.customer_sku_ids.filtered(
-                            lambda m: m.customer_id == partner
-                        )" />
-
-                                                <t
-                                                    t-if="wiz.get('description_mode') == 'buyer' and mapping">
-                                                    <t t-esc="mapping[0].customer_description" />
-                                                </t>
-                                                <t
-                                                    t-elif="wiz.get('description_mode') == 'export' and tmpl.export_description">
-                                                    <t t-esc="tmpl.export_description" />
-                                                </t>
-                                                <t
-                                                    t-elif="wiz.get('description_mode') == 'foreign' and tmpl.foreign_description">
-                                                    <t t-esc="tmpl.foreign_description" />
-                                                </t>
-                                                <t t-else="">
-                                                    <t t-esc="line.name" />
-                                                </t>
-                                            </td>
-
-                                            <td align="right">
-                                                <t t-esc="line.product_id.l10n_in_hsn_code or ''" />
-                                            </td>
-
-
-                                            <td class="text-right">
-                                                <t t-esc="line.quantity" />
-                                            </td>
-
-                                            <td class="text-right">
-                                                <t t-esc="line.price_unit" />
-                                            </td>
-
-                                            <td class="text-right">
-                                                <t t-esc="line.price_subtotal" />
-                                            </td>
-                                        </tr>
-                                    </t>
-
-                                    <t t-set="sr" t-value="sr + 1" />
-                                </t>
-
-                            </t>
-
-                        </tbody>
-
-
-                        <!-- Iterate over all invoice lines -->
-                        <tbody>
-
-                            <t t-set="row_index" t-value="0" />
-
-                            <t t-foreach="o.invoice_line_ids" t-as="line">
-                               <t t-set="selected_ids" t-value="wiz.get('selected_line_ids', [])"/>
-
-                                    <t t-set="row_index" t-value="row_index + 1" />
-
-                                </t>
-                        </tbody>
-                    </table>
-                         
-
-                    <t t-set="net_amount"
-                        t-value="product_total" />
-
-                    <!-- <t t-set="net_cf_usd"
-                            t-value="net_amount + freight_total" />
-
-                        <t t-set="net_cif_usd"
-                            t-value="net_cf_usd + (o.insurance_usd or 0.0)" /> -->
-
-                    <t t-if="wiz.get('show_net_amount')">
-                        <t t-set="amount_for_words" t-value="net_amount" />
-                    </t>
-
-                    <t t-if="wiz.get('show_net_cf')">
-                        <t t-set="amount_for_words" t-value="net_cf" />
-                    </t>
-
-                    <t t-if="wiz.get('show_net_cif')">
-                        <t t-set="amount_for_words" t-value="net_cif" />
-                    </t>
-
-
-                    <!-- ================= TOTALS ================= -->
-                    <table>
-                        <tr>
-                            <td width="60%">
-                                <strong>Amount in Words</strong>
-                                <br />
-                                <t t-esc="o.currency_id.amount_to_text(amount_for_words or 0.0)" />
-
-
-                            </td>
-                            <td width="40%">
-                                <table class="no-border">
-                                    <!-- <tr>
-                                            <td>Total FOB USD</td>
-                                            <td class="text-right">
-                                                <t t-esc="round(product_total,2)" />
-                                            </td>
-                                        </tr> -->
-                                    <tr>
-                                        <td>DISCOUNT</td>
-                                        <td class="text-right">
-                                            <t t-esc="round(discount_amount,2)" />
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>FREIGHT</td>
-                                        <td class="text-right">
-                                            <t t-esc="round(freight_total,2)" />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>INSURANCE</td>
-                                        <td class="text-right">
-                                            <t t-esc="round(insurance_total, 2)" />
-
-                                        </td>
-                                    </tr>
-                                    <t t-if="wiz.get('show_net_amount')">
-                                        <tr>
-                                            <td>
-                                                <strong>NET AMOUNT (<t
-                                                        t-esc="o.currency_id.name" />)</strong>
-                                            </td>
-                                            <td class="text-right">
-                                                <strong>
-                                                    <t t-esc="round(net_amount,2)" />
-                                                </strong>
-                                            </td>
-                                        </tr>
-                                    </t>
-
-                                    <t t-if="wiz.get('show_net_cf')">
-                                        <tr>
-                                            <td>
-                                                <strong>NET C&amp;F (<t
-                                                        t-esc="o.currency_id.name" />)</strong>
-                                            </td>
-                                            <td class="text-right">
-                                                <strong>
-
-                                                    <t t-esc="round(net_cf, 2)" />
-                                                </strong>
-                                            </td>
-                                        </tr>
-                                    </t>
-
-                                    <t t-if="wiz.get('show_net_cif')">
-                                        <tr>
-                                            <td>
-                                                <strong>NET CIF (<t t-esc="o.currency_id.name" /> )</strong>
-                                            </td>
-                                            <td class="text-right">
-                                                <strong>
-                                                    <t
-                                                        t-esc="round(net_cf + insurance_total, 2)" />
-                                                </strong>
-                                            </td>
-                                        </tr>
-                                    </t>
-
-
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <t t-set="net_weight" t-value="o.net_weight or 0.0" />
-                    <t t-set="gross_weight" t-value="o.gross_weight or 0.0" />
-                    <t t-set="total_packages" t-value="o.total_packages or 0" />
-
-
-                    <table>
-                        <tr>
-                            <td width="33%">
-                                <strong>Total Net Weight (Kgs)</strong>
-                                <br />
-                                <t t-esc="round(net_weight,3)" />
-                            </td>
-
-                            <td width="33%">
-                                <strong>Total Gross Weight (Kgs)</strong>
-                                <br />
-                                <t t-esc="round(gross_weight,3)" />
-                            </td>
-
-                            <td width="34%">
-                                <strong>Total Packages</strong>
-                                <br />
-                                <t t-esc="total_packages" />
-                            </td>
-                        </tr>
-                    </table>
-
-
-                    <!-- ================= DECLARATION ================= -->
-                    <table>
-                        <tr>
                             <td>
-                                <strong>Declaration :</strong><br /> We declare that this invoice
-                                shows the actual price of the goods described and that all
-                                particulars are true &amp; correct. </td>
+                                <t t-esc="line.product_id.default_code or ''"/>
+                            </td>
 
-                            <td class="text-right" width="33%"> For <strong>
-                                    <t t-esc="o.company_id.name" />
-                                </strong><br /><br />
-                                Authorised Signatory </td>
+                            <td>
+                                <t t-esc="line.name"/>
+                            </td>
+
+                            <td>
+                                <t t-esc="line.product_id.l10n_in_hsn_code or ''"/>
+                            </td>
+
+                            <td>
+                                <t t-esc="line.quantity"/>
+                            </td>
+
+                            <td>
+                                <t t-esc="line.price_unit"/>
+                            </td>
+
+                            <td>
+                                <t t-esc="line.price_subtotal"/>
+                            </td>
                         </tr>
-                    </table>
 
-                    <!-- ================= SIGN ================= -->
+                        <t t-set="sr" t-value="sr + 1"/>
 
+                    </t>
 
-                </div>
+                </t>
 
+            </tbody>
+        </table>
+
+        <!-- ================= TOTALS ================= -->
+        <br/>
+
+        <table style="width:40%; float:right;">
+            <tr>
+                <td>Discount</td>
+                <td class="text-right">
+                    <t t-esc="round(discount_amount,2)"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Freight</td>
+                <td class="text-right">
+                    <t t-esc="round(freight_total,2)"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Insurance</td>
+                <td class="text-right">
+                    <t t-esc="round(insurance_total,2)"/>
+                </td>
+            </tr>
+
+            <t t-if="wiz.get('show_net_amount')">
+            <tr>
+                <td><b>NET AMOUNT</b></td>
+                <td class="text-right">
+                    <t t-esc="round(net_amount,2)"/>
+                </td>
+            </tr>
             </t>
-        </t>
-    </template>
 
+            <t t-if="wiz.get('show_net_cf')">
+            <tr>
+                <td><b>NET C&amp;F</b></td>
+                <td class="text-right">
+                    <t t-esc="round(net_cf,2)"/>
+                </td>
+            </tr>
+            </t>
+
+            <t t-if="wiz.get('show_net_cif')">
+            <tr>
+                <td><b>NET CIF</b></td>
+                <td class="text-right">
+                    <t t-esc="round(net_cif,2)"/>
+                </td>
+            </tr>
+            </t>
+
+        </table>
+
+    </div>
+
+</t>
+</t>
+</template>
 </odoo>
