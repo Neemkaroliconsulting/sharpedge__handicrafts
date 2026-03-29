@@ -584,62 +584,15 @@ class AccountMoveLine(models.Model):
     
 
 
-# =========================================================
-# EXPORT REPORT (🔥 FIXED)
-# =========================================================
 class ExportInvoiceReport(models.AbstractModel):
     _name = "report.export_docs.export_invoice_template"
 
-    def _get_report_values(self, docids, data=None):
-        docs = self.env["account.move"].browse(docids)
-        data = data or {}
-
-        res_grouped = {}
-
-        for inv in docs:
-            selected_ids = data.get('selected_line_ids') or []
-
-            # 🔥 SAFE FILTER
-            lines = inv.invoice_line_ids.filtered(
-                lambda l: not l.display_type and l.product_id
-            )
-
-            if selected_ids:
-                lines = lines.filtered(lambda l: l.id in selected_ids)
-
-            grouped = {}
-
-            for line in lines:
-                sale = line.sale_line_ids.order_id[:1]
-                key = sale.buyer_order_no if sale and sale.buyer_order_no else "Standard"
-
-                grouped.setdefault(key, []).append(line)
-
-            res_grouped[inv.id] = grouped
-
-        return {
-            'doc_ids': docids,
-            'doc_model': 'account.move',
-            'docs': docs,
-            'data': data,
-            'grouped_lines': res_grouped,
-        }
-
-# =========================================================
-# TAX REPORT (🔥 SAME FIX)
-# =========================================================
-class TaxInvoiceReport(models.AbstractModel):
-    _name = "report.export_docs.tax_invoice_template"
-
-    def _group_lines_by_buyer_order(self, invoice, selected_ids=None):
+    def _group_lines_by_buyer_order(self, invoice):
         grouped = {}
+        for line in invoice.invoice_line_ids:
+            if not line.product_id or line.product_id.type == 'service':
+                continue
 
-        for line in invoice.invoice_line_ids.filtered(
-            lambda l: l.product_id
-            and l.product_id.type != 'service'
-            and (not selected_ids or l.id in selected_ids)
-            and l.show_in_invoice
-        ):
             bo = (
                 line.sale_line_ids
                 and line.sale_line_ids[0].order_id.buyer_order_no
@@ -650,21 +603,54 @@ class TaxInvoiceReport(models.AbstractModel):
 
         return grouped
 
+
     def _get_report_values(self, docids, data=None):
         docs = self.env["account.move"].browse(docids)
-
-        selected_ids = data.get('selected_line_ids') if data else []
 
         return {
             'doc_ids': docs.ids,
             'doc_model': 'account.move',
             'docs': docs,
-            'data': data or {},
             'grouped_lines': {
-                inv.id: self._group_lines_by_buyer_order(inv, selected_ids)
+                inv.id: self._group_lines_by_buyer_order(inv)
                 for inv in docs
-            }
         }
+}
+
+
+class TaxInvoiceReport(models.AbstractModel):
+    _name = "report.export_docs.tax_invoice_template"
+
+    def _group_lines_by_buyer_order(self, invoice):
+        grouped = {}
+        for line in invoice.invoice_line_ids:
+            if not line.product_id or line.product_id.type == 'service':
+                continue
+
+            bo = (
+                line.sale_line_ids
+                and line.sale_line_ids[0].order_id.buyer_order_no
+                or 'NO BUYER ORDER'
+            )
+
+            grouped.setdefault(bo, []).append(line)
+
+        return grouped
+
+
+    def _get_report_values(self, docids, data=None):
+        docs = self.env["account.move"].browse(docids)
+
+        return {
+            'doc_ids': docs.ids,
+            'doc_model': 'account.move',
+            'docs': docs,
+            'grouped_lines': {
+                inv.id: self._group_lines_by_buyer_order(inv)
+                for inv in docs
+        }
+}
+
 
 
 class PackingListBatchReport(models.AbstractModel):
