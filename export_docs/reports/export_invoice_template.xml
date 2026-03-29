@@ -23,7 +23,17 @@
         <field name="binding_type">report</field>
         <field name="paperformat_id" ref="export_docs.paperformat_export_a4" />
     </record>
+<div>
+    DEBUG DOC ID: <t t-esc="o.id"/>
+</div>
 
+<div>
+    TOTAL LINES: <t t-esc="len(o.invoice_line_ids)"/>
+</div>
+
+<div>
+    GROUP DATA: <t t-esc="grouped_lines.get(o.id)"/>
+</div>
     <!-- ================= TEMPLATE ================= -->
 <template id="export_invoice_template">
     <t t-call="web.basic_layout">
