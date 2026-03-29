@@ -94,19 +94,17 @@ class DescriptionSelectWizard(models.TransientModel):
     # ==================================================
     # PRINT ACTION (🔥 FIXED - NO CONTEXT BUG)
     # ==================================================
-    def action_print_report(self):
-        active_ids = self.env.context.get("active_ids")
-
-        return self.env.ref(
-            "export_docs.action_export_invoice_report"
-        ).report_action(
-            active_ids,
-            data={
-                "selected_line_ids": self.line_ids.ids,
-                "description_mode": self.description_mode,
-                "show_net_amount": self.show_net_amount,
-                "show_net_cf": self.show_net_cf,
-                "show_net_cif": self.show_net_cif,
-                "group_by": self.group_by,
-            }
-        )
+   def action_print_report(self):
+    return self.env.ref(
+        "export_docs.action_export_invoice_report"
+    ).report_action(
+        self.env.context.get("active_ids"),
+        data={
+            "selected_line_ids": self.line_ids.ids,
+            "description_mode": self.description_mode,
+            "show_net_amount": self.show_net_amount,
+            "show_net_cf": self.show_net_cf,
+            "show_net_cif": self.show_net_cif,
+            "group_by": self.group_by,
+        }
+    )
