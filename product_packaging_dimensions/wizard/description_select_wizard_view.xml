@@ -3,46 +3,62 @@
         <field name="name">description.select.wizard.form</field>
         <field name="model">description.select.wizard</field>
         <field name="arch" type="xml">
-            <form string="Packing List Cum Invoice (Export Printing)">
+
+            <form string="Export Invoice / Packing Print">
 
                 <group col="2">
-                    <group string="Format">
-                        <field name="report_type" widget="radio" />
+
+                    <!-- ================= FORMAT ================= -->
+                    <group string="Report Type">
+                        <field name="report_type" widget="radio"/>
                     </group>
 
+                    <!-- ================= DESCRIPTION ================= -->
                     <group string="Item Description">
-                        <field name="description_mode" widget="radio" />
-                          <field name="output_format" widget="radio"/>
+                        <field name="description_mode" widget="radio"/>
+                        <field name="output_format" widget="radio"/>
                     </group>
-                    <group> 
 
+                    <!-- ================= GROUPING (🔥 NEW) ================= -->
+                    <group string="Grouping">
+                        <field name="group_by" widget="radio"/>
+                    </group>
+
+                </group>
+
+                <!-- ================= PRODUCT SELECTION ================= -->
+                <group string="Select Products">
                     <field name="line_ids"
-       widget="many2many_checkboxes"
-       options="{'no_create': True, 'no_open': True}"/></group>
-
-                    <group>
-                        <field name="show_pcs_per_box" />
-                        <field name="show_total_qty" />
-                        <field name="show_dimensions" />
-                    </group>
+                           widget="many2many_checkboxes"
+                           options="{'no_create': True, 'no_open': True}"/>
                 </group>
 
-                <group string="Summary (Show on Print)" col="2">
-                    <!-- <field name="show_pcs_per_box"/> -->
-                    <field name="show_net_amount" />
-                    <field name="show_net_cf" />
-                    <field name="show_net_cif" />
+                <!-- ================= DISPLAY OPTIONS ================= -->
+                <group string="Display Options" col="3">
+                    <field name="show_pcs_per_box"/>
+                    <field name="show_total_qty"/>
+                    <field name="show_dimensions"/>
                 </group>
 
+                <!-- ================= TOTAL OPTIONS ================= -->
+                <group string="Totals / Summary" col="3">
+                    <field name="show_net_amount"/>
+                    <field name="show_net_cf"/>
+                    <field name="show_net_cif"/>
+                </group>
+
+                <!-- ================= FOOTER ================= -->
                 <footer>
                     <button name="action_print_report"
-                        string="Print"
-                        type="object"
-                        class="btn-primary" />
-                    <button string="Cancel" special="cancel" />
+                            string="Print"
+                            type="object"
+                            class="btn-primary"/>
+
+                    <button string="Cancel" special="cancel"/>
                 </footer>
 
             </form>
+
         </field>
     </record>
 </odoo>
