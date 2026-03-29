@@ -593,26 +593,30 @@ class ExportInvoiceReport(models.AbstractModel):
     def _get_report_values(self, docids, data=None):
         docs = self.env["account.move"].browse(docids)
         data = data or {}
-        
-        # We prepare grouped data but keep a 'raw' fallback
+
         res_grouped = {}
+
         for inv in docs:
             selected_ids = data.get('selected_line_ids', [])
-            
-            # Filter lines based on selection
+
+            # ✅ FILTER CORRECT
             if selected_ids:
-                lines = inv.invoice_line_ids.filtered(lambda l: l.id in selected_ids)
+                lines = inv.invoice_line_ids.filtered(
+                    lambda l: l.id in selected_ids and not l.display_type and l.product_id
+                )
             else:
-                lines = inv.invoice_line_ids.filtered(lambda l: not l.display_type and l.product_id)
-            
-            # Grouping Logic
+                lines = inv.invoice_line_ids.filtered(
+                    lambda l: not l.display_type and l.product_id
+                )
+
             grouped = {}
+
             for line in lines:
-                # Get Buyer Order No from Sale Order linked to the invoice line
-                sale_order = line.sale_line_ids.order_id[:1]
-                key = sale_order.buyer_order_no if sale_order and sale_order.buyer_order_no else "Standard"
+                sale = line.sale_line_ids.order_id[:1]
+                key = sale.buyer_order_no if sale and sale.buyer_order_no else "Standard"
+
                 grouped.setdefault(key, []).append(line)
-            
+
             res_grouped[inv.id] = grouped
 
         return {
