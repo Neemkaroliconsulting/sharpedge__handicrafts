@@ -95,23 +95,23 @@ class DescriptionSelectWizard(models.TransientModel):
     # ==================================================
     def action_print_report(self):
 
-    active_ids = self.env.context.get("active_ids")
+        active_ids = self.env.context.get("active_ids")
 
-    if not active_ids:
-        raise UserError("No active invoice found!")
+        if not active_ids:
+            raise UserError("No active invoice found!")
 
-    invoices = self.env["account.move"].browse(active_ids)
+        invoices = self.env["account.move"].browse(active_ids)
 
-    return self.env.ref(
-        "export_docs.action_export_invoice_report"
-    ).report_action(
-        invoices,
-        data={
-            "selected_line_ids": self.line_ids.ids,
-            "description_mode": self.description_mode,
-            "show_net_amount": self.show_net_amount,
-            "show_net_cf": self.show_net_cf,
-            "show_net_cif": self.show_net_cif,
-            "group_by": self.group_by,
-        }
-    )
+        return self.env.ref(
+            "export_docs.action_export_invoice_report"
+        ).report_action(
+            invoices,
+            data={
+                "selected_line_ids": self.line_ids.ids,
+                "description_mode": self.description_mode,
+                "show_net_amount": self.show_net_amount,
+                "show_net_cf": self.show_net_cf,
+                "show_net_cif": self.show_net_cif,
+                "group_by": self.group_by,
+            }
+        )
