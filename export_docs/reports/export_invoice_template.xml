@@ -58,19 +58,18 @@
                     </thead>
 
                     <tbody>
-                        
-                        <!-- 🔥 IMPORTANT FIX -->
-                        <t t-set="groups" t-value="grouped_lines.get(o.id)"/>
 
+                        <!-- 🔥 SAFE GROUP FETCH -->
+                        <t t-set="groups" t-value="grouped_lines.get(o.id) or {}"/>
+
+                        <!-- 🔥 MAIN LOOP -->
                         <t t-if="groups">
                             <t t-foreach="groups.items()" t-as="grp">
 
                                 <!-- GROUP HEADER -->
                                 <tr>
                                     <td colspan="4">
-                                        <strong>Buyer Order: 
-                                            <t t-esc="grp[0]"/>
-                                        </strong>
+                                        <strong>Buyer Order: <t t-esc="grp[0]"/></strong>
                                     </td>
                                 </tr>
 
@@ -108,18 +107,14 @@
                             </t>
                         </t>
 
-                        <!-- ❗ FALLBACK (AGAR GROUP FAIL HO) -->
+                        <!-- 🔥 FALLBACK (kabhi grouping fail ho) -->
                         <t t-else="">
                             <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.product_id and not l.display_type)" t-as="line">
 
                                 <tr>
                                     <td><t t-esc="line.name"/></td>
-                                    <td class="text-right">
-                                        <t t-esc="line.quantity"/>
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-esc="line.price_unit"/>
-                                    </td>
+                                    <td class="text-right"><t t-esc="line.quantity"/></td>
+                                    <td class="text-right"><t t-esc="line.price_unit"/></td>
                                 </tr>
 
                             </t>
@@ -134,15 +129,11 @@
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Total Weight:</strong></td>
-                                <td class="text-right">
-                                    <t t-esc="o.net_weight"/> Kg
-                                </td>
+                                <td class="text-right"><t t-esc="o.net_weight"/> Kg</td>
                             </tr>
                             <tr>
                                 <td><strong>Total CBM:</strong></td>
-                                <td class="text-right">
-                                    <t t-esc="o.cbm_total"/>
-                                </td>
+                                <td class="text-right"><t t-esc="o.cbm_total"/></td>
                             </tr>
                         </table>
                     </div>
