@@ -20,13 +20,13 @@ class DescriptionSelectWizard(models.TransientModel):
     )
 
     # ==================================================
-    # PRODUCTS (ONLY CURRENT INVOICE)
+    # ✅ PRODUCTS (ONLY CURRENT INVOICE)
     # ==================================================
     line_ids = fields.Many2many(
-        "account.move.line",
-        string="Select Products",
-        domain="[('move_id', '=', context.get('active_id')), ('tax_line_id', '=', False)]"
-    )
+    "account.move.line",
+    string="Select Products",
+    domain="[('move_id', '=', context.get('active_id')), ('tax_line_id', '=', False),]"
+)
 
     # ==================================================
     # OUTPUT
@@ -61,52 +61,39 @@ class DescriptionSelectWizard(models.TransientModel):
     show_net_cf = fields.Boolean("Net C&F")
     show_net_cif = fields.Boolean("Net CI&F")
 
-    group_by = fields.Selection(
-        [
-            ('none', 'No Grouping'),
-            ('buyer_order', 'Buyer Order'),
-        ],
-        default='buyer_order',
-        string="Grouping"
-    )
-
     # ==================================================
-    # DEFAULT LOAD
+    # 🔥 MAIN FIX (ONLY CURRENT INVOICE DATA LOAD)
     # ==================================================
     @api.model
-    def default_get(self, fields_list):
-        res = super().default_get(fields_list)
+    def default_get(self, fields):
+        res = super().default_get(fields)
 
         active_id = self.env.context.get("active_id")
 
         if active_id:
             invoice = self.env["account.move"].browse(active_id)
 
+            # ✔ ONLY CURRENT INVOICE LINES
             lines = invoice.invoice_line_ids.filtered(
-                lambda l: l.product_id and not l.tax_line_id and not l.display_type
-            )
+            lambda l: l.product_id and not l.tax_line_id and not l.display_type
+        )
 
             res["line_ids"] = [(6, 0, lines.ids)]
 
         return res
 
     # ==================================================
-    # PRINT ACTION (🔥 FIXED)
+    # PRINT ACTION
     # ==================================================
     def action_print_report(self):
-    
         active_ids = self.env.context.get("active_ids")
-    
-        if not active_ids:
-            raise UserError("No invoice found!")
-    
-        invoices = self.env["account.move"].browse(active_ids)
-    
+
+        wizard_data = {
+            "selected_line_ids": self.line_ids.ids
+        }
+
         return self.env.ref(
             "export_docs.action_export_invoice_report"
-        ).report_action(
-            invoices,
-            data={
-                "selected_line_ids": self.line_ids.ids,
-            }
-        )
+        ).with_context(
+            wizard_data=wizard_data
+        ).report_action(active_ids)
