@@ -61,7 +61,6 @@ class DescriptionSelectWizard(models.TransientModel):
     show_net_cf = fields.Boolean("Net C&F")
     show_net_cif = fields.Boolean("Net CI&F")
 
-    # 👉 NEW (dynamic grouping future ready)
     group_by = fields.Selection(
         [
             ('none', 'No Grouping'),
@@ -72,11 +71,11 @@ class DescriptionSelectWizard(models.TransientModel):
     )
 
     # ==================================================
-    # DEFAULT LOAD (ONLY CURRENT INVOICE LINES)
+    # DEFAULT LOAD
     # ==================================================
     @api.model
-    def default_get(self, fields):
-        res = super().default_get(fields)
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
 
         active_id = self.env.context.get("active_id")
 
@@ -92,9 +91,9 @@ class DescriptionSelectWizard(models.TransientModel):
         return res
 
     # ==================================================
-    # PRINT ACTION (🔥 FIXED - NO CONTEXT BUG)
+    # PRINT ACTION (🔥 FIXED)
     # ==================================================
-       def action_print_report(self):
+    def action_print_report(self):
         return self.env.ref(
             "export_docs.action_export_invoice_report"
         ).report_action(
