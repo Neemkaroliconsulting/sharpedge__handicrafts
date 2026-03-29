@@ -29,20 +29,10 @@
     <t t-call="web.basic_layout">
         <t t-foreach="docs" t-as="o">
 
-            <div>
-    DEBUG DOC ID: <t t-esc="o.id"/>
-</div>
-
-<div>
-    TOTAL LINES: <t t-esc="len(o.invoice_line_ids)"/>
-</div>
-
-<div>
-    GROUP DATA: <t t-esc="grouped_lines.get(o.id)"/>
-</div>
             <div class="page" style="font-size: 12px;">
                 <h2 class="text-center">EXPORT INVOICE</h2>
                 
+                <!-- HEADER -->
                 <div class="row mb-4">
                     <div class="col-6">
                         <strong>Exporter:</strong> <t t-esc="o.company_id.name"/><br/>
@@ -54,6 +44,7 @@
                     </div>
                 </div>
 
+                <!-- TABLE -->
                 <table class="table table-bordered" style="width:100%;">
                     <thead>
                         <tr>
@@ -65,57 +56,99 @@
                             </t>
                         </tr>
                     </thead>
-                   <tbody>
 
-    <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.product_id and not l.display_type)" t-as="line">
+                    <tbody>
+                        
+                        <!-- 🔥 IMPORTANT FIX -->
+                        <t t-set="groups" t-value="grouped_lines.get(o.id)"/>
 
-        <tr>
-            <td>
-                <t t-if="data.get('description_mode') == 'buyer'">
-                    <t t-esc="line.product_id.name"/> (Buyer Ref)
-                </t>
-                <t t-else="">
-                    <t t-esc="line.name"/>
-                </t>
-            </td>
+                        <t t-if="groups">
+                            <t t-foreach="groups.items()" t-as="grp">
 
-            <td class="text-right">
-                <t t-esc="line.quantity"/> 
-                <t t-esc="line.product_uom_id.name"/>
-            </td>
+                                <!-- GROUP HEADER -->
+                                <tr>
+                                    <td colspan="4">
+                                        <strong>Buyer Order: 
+                                            <t t-esc="grp[0]"/>
+                                        </strong>
+                                    </td>
+                                </tr>
 
-            <td class="text-right">
-                <t t-esc="line.price_unit"/>
-            </td>
+                                <!-- LINES -->
+                                <t t-foreach="grp[1]" t-as="line">
 
-            <t t-if="data.get('show_net_amount')">
-                <td class="text-right">
-                    <t t-esc="line.price_subtotal"/>
-                </td>
-            </t>
+                                    <tr>
+                                        <td>
+                                            <t t-if="data.get('description_mode') == 'buyer'">
+                                                <t t-esc="line.product_id.name"/> (Buyer Ref)
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="line.name"/>
+                                            </t>
+                                        </td>
 
-        </tr>
+                                        <td class="text-right">
+                                            <t t-esc="line.quantity"/>
+                                            <t t-esc="line.product_uom_id.name"/>
+                                        </td>
 
-    </t>
+                                        <td class="text-right">
+                                            <t t-esc="line.price_unit"/>
+                                        </td>
 
-</tbody>                </table>
+                                        <t t-if="data.get('show_net_amount')">
+                                            <td class="text-right">
+                                                <t t-esc="line.price_subtotal"/>
+                                            </td>
+                                        </t>
+                                    </tr>
 
+                                </t>
+
+                            </t>
+                        </t>
+
+                        <!-- ❗ FALLBACK (AGAR GROUP FAIL HO) -->
+                        <t t-else="">
+                            <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.product_id and not l.display_type)" t-as="line">
+
+                                <tr>
+                                    <td><t t-esc="line.name"/></td>
+                                    <td class="text-right">
+                                        <t t-esc="line.quantity"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="line.price_unit"/>
+                                    </td>
+                                </tr>
+
+                            </t>
+                        </t>
+
+                    </tbody>
+                </table>
+
+                <!-- TOTAL -->
                 <div class="row justify-content-end">
                     <div class="col-4">
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Total Weight:</strong></td>
-                                <td class="text-right"><t t-esc="o.net_weight"/> Kg</td>
+                                <td class="text-right">
+                                    <t t-esc="o.net_weight"/> Kg
+                                </td>
                             </tr>
                             <tr>
                                 <td><strong>Total CBM:</strong></td>
-                                <td class="text-right"><t t-esc="o.cbm_total"/></td>
+                                <td class="text-right">
+                                    <t t-esc="o.cbm_total"/>
+                                </td>
                             </tr>
                         </table>
                     </div>
                 </div>
+
             </div>
         </t>
     </t>
-</template>
-</odoo>
+</template></odoo>
