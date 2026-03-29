@@ -597,17 +597,15 @@ class ExportInvoiceReport(models.AbstractModel):
         res_grouped = {}
 
         for inv in docs:
-            selected_ids = data.get('selected_line_ids', [])
+            selected_ids = data.get('selected_line_ids') or []
 
-            # ✅ FILTER CORRECT
+            # 🔥 SAFE FILTER
+            lines = inv.invoice_line_ids.filtered(
+                lambda l: not l.display_type and l.product_id
+            )
+
             if selected_ids:
-                lines = inv.invoice_line_ids.filtered(
-                    lambda l: l.id in selected_ids and not l.display_type and l.product_id
-                )
-            else:
-                lines = inv.invoice_line_ids.filtered(
-                    lambda l: not l.display_type and l.product_id
-                )
+                lines = lines.filtered(lambda l: l.id in selected_ids)
 
             grouped = {}
 
@@ -626,7 +624,6 @@ class ExportInvoiceReport(models.AbstractModel):
             'data': data,
             'grouped_lines': res_grouped,
         }
-
 
 # =========================================================
 # TAX REPORT (🔥 SAME FIX)
