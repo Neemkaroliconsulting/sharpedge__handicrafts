@@ -25,38 +25,94 @@
     </record>
 
     <!-- ================= TEMPLATE ================= -->
-<template id="export_invoice_template">
-    <t t-name="export_docs.export_invoice_template">
-        <t t-call="web.basic_layout">
-            <t t-foreach="docs" t-as="o">
+<template id="export_invoice_template" t-name="export_docs.export_invoice_template">
+    <t t-call="web.basic_layout">
 
-                <div class="page">
-                    <h2>EXPORT INVOICE</h2>
+        <t t-foreach="docs" t-as="o">
 
-                    <div>Invoice: <t t-esc="o.name"/></div>
+            <!-- ✅ WIZARD DATA -->
+            <t t-set="wiz" t-value="o._context.get('wizard_data', {})"/>
+            <t t-set="selected_ids" t-value="wiz.get('selected_line_ids', [])"/>
 
-                    <table border="1" width="100%">
+            <!-- ================= GROUP BUILD ================= -->
+            <t t-set="grouped_lines" t-value="{}"/>
+
+            <t t-foreach="o.invoice_line_ids" t-as="line">
+                <t t-if="(not selected_ids or line.id in selected_ids) and line.product_id and line.product_id.type != 'service'">
+
+                    <t t-set="bo"
+                        t-value="(line.sale_line_ids and line.sale_line_ids[0].order_id and line.sale_line_ids[0].order_id.buyer_order_no) or 'NO BUYER ORDER'"/>
+
+                    <t t-set="current" t-value="grouped_lines.get(bo, [])"/>
+
+                    <t t-set="grouped_lines"
+                        t-value="dict(grouped_lines, **{bo: current + [line]})"/>
+
+                </t>
+            </t>
+
+            <!-- ================= PAGE ================= -->
+            <div class="page">
+                <h2 style="text-align:center;">EXPORT INVOICE</h2>
+
+                <div>
+                    <strong>Invoice:</strong> <t t-esc="o.name"/>
+                </div>
+
+                <!-- ================= TABLE ================= -->
+                <table border="1" width="100%" style="margin-top:10px;">
+                    <thead>
                         <tr>
+                            <th>Sr</th>
                             <th>Product</th>
                             <th>Qty</th>
-                            <th>Price</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
                         </tr>
+                    </thead>
 
-                        <t t-foreach="o.invoice_line_ids" t-as="line">
-                            <t t-if="line.product_id and not line.display_type">
+                    <tbody>
+
+                        <t t-set="sr" t-value="1"/>
+
+                        <!-- GROUP LOOP -->
+                        <t t-foreach="grouped_lines.items()" t-as="grp">
+
+                            <!-- GROUP HEADER -->
+                            <tr>
+                                <td colspan="5" style="background:#eee;">
+                                    <strong>Buyer Order: <t t-esc="grp[0]"/></strong>
+                                </td>
+                            </tr>
+
+                            <!-- LINES -->
+                            <t t-foreach="grp[1]" t-as="line">
+
                                 <tr>
+                                    <td><t t-esc="sr"/></td>
                                     <td><t t-esc="line.name"/></td>
                                     <td><t t-esc="line.quantity"/></td>
                                     <td><t t-esc="line.price_unit"/></td>
+                                    <td><t t-esc="line.price_subtotal"/></td>
                                 </tr>
+
+                                <t t-set="sr" t-value="sr + 1"/>
+
                             </t>
+
                         </t>
 
-                    </table>
+                    </tbody>
+                </table>
 
+                <!-- ================= TOTAL ================= -->
+                <div style="margin-top:20px;">
+                    <strong>Total Amount:</strong>
+                    <t t-esc="sum(o.invoice_line_ids.mapped('price_subtotal'))"/>
                 </div>
 
-            </t>
+            </div>
+
         </t>
     </t>
 </template>
