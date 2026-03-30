@@ -1,9 +1,18 @@
 <odoo>
     <record id="action_description_select_wizard"
-            model="ir.actions.act_window">
-        <field name="name">Select Item Description</field>
-        <field name="res_model">description.select.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-    </record>
+        model="ir.actions.act_window">
+    <field name="name">Select Item Description</field>
+    <field name="res_model">description.select.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+
+    <!-- ✅ IMPORTANT FIX -->
+    <field name="context">
+        {
+            'active_id': active_id,
+            'active_ids': active_ids,
+            'active_model': 'account.move'
+        }
+    </field>
+</record>
 </odoo>
