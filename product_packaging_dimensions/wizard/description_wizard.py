@@ -19,7 +19,7 @@ class DescriptionSelectWizard(models.TransientModel):
         required=True,
     )
 
-    # ✅ FINAL FIX: DEFAULT USED INSTEAD OF DOMAIN
+    # ✅ FINAL FIX
     line_ids = fields.Many2many(
         "account.move.line",
         string="Select Products",
@@ -37,7 +37,7 @@ class DescriptionSelectWizard(models.TransientModel):
     )
 
     # ==================================================
-    # ITEM DESCRIPTION
+    # ITEM DESCRIPTION (INVOICE ONLY)
     # ==================================================
     description_mode = fields.Selection(
         [
@@ -55,6 +55,7 @@ class DescriptionSelectWizard(models.TransientModel):
         "product.packaging",
         string="Packaging (Carton Type)",
         domain="[('id', 'in', allowed_packaging_ids)]",
+        help="Print only selected packaging"
     )
 
     allowed_packaging_ids = fields.Many2many(
@@ -66,12 +67,12 @@ class DescriptionSelectWizard(models.TransientModel):
     show_pcs_per_box = fields.Boolean("Show PCS / Box", default=True)
     show_total_qty = fields.Boolean("Show Total Qty (PCS × Boxes)", default=True)
     show_dimensions = fields.Boolean("Show Box Dimensions (L×W×H)", default=True)
-    show_net_amount = fields.Boolean("Net Amount")
-    show_net_cf = fields.Boolean("Net C&F")
+    show_net_amount = fields.Boolean("Net Amount") 
+    show_net_cf = fields.Boolean("Net C&F") 
     show_net_cif = fields.Boolean("Net CI&F")
 
     # ==================================================
-    # ✅ DEFAULT LINES FUNCTION (MAIN FIX)
+    # DEFAULT LINES (MAIN FIX)
     # ==================================================
     def _get_default_lines(self):
         active_ids = self.env.context.get("active_ids", [])
@@ -99,6 +100,8 @@ class DescriptionSelectWizard(models.TransientModel):
             if not active_model or not active_ids:
                 continue
 
+            pickings = self.env["stock.picking"]
+
             if active_model == "stock.picking":
                 pickings = self.env["stock.picking"].browse(active_ids)
 
@@ -113,8 +116,6 @@ class DescriptionSelectWizard(models.TransientModel):
                 ).mapped(
                     "invoice_line_ids.sale_line_ids.order_id.picking_ids"
                 )
-            else:
-                pickings = self.env["stock.picking"]
 
             products = pickings.mapped("move_ids_without_package.product_id")
 
@@ -138,14 +139,35 @@ class DescriptionSelectWizard(models.TransientModel):
             "show_pcs_per_box": self.show_pcs_per_box,
             "show_total_qty": self.show_total_qty,
             "show_dimensions": self.show_dimensions,
-            "show_net_amount": self.show_net_amount,
-            "show_net_cf": self.show_net_cf,
+            "show_net_amount": self.show_net_amount, 
+            "show_net_cf": self.show_net_cf, 
             "show_net_cif": self.show_net_cif,
             "selected_line_ids": self.line_ids.ids
         }
 
+        # ================= PDF =================
+        if self.output_format == "pdf":
+
+            if self.report_type == "packing":
+                pass
+
+            if self.report_type == "export":
+                return self.env.ref(
+                    "export_docs.action_export_invoice_report"
+                ).with_context(
+                    wizard_data=wizard_data
+                ).report_action(active_ids)
+
+            if self.report_type == "tax":
+                return self.env.ref(
+                    "export_docs.action_tax_invoice_report"
+                ).with_context(
+                    wizard_data=wizard_data
+                ).report_action(active_ids)
+
         # ================= EXCEL =================
         if self.output_format == "excel":
+            active_ids = self.env.context.get("active_ids", [])
             return {
                 "type": "ir.actions.act_url",
                 "url": (
@@ -156,11 +178,89 @@ class DescriptionSelectWizard(models.TransientModel):
                 "target": "self",
             }
 
-        # ================= PACKING =================
+        # ==================================================
+        # 📦 PACKING LIST
+        # ==================================================
         if self.report_type == "packing":
-            raise UserError("Use your existing packing logic here")
 
-        # ================= EXPORT / TAX =================
+            if active_model == "stock.picking":
+                pickings = self.env["stock.picking"].browse(active_ids)
+                batches = pickings.mapped("batch_id").filtered(lambda b: b)
+
+                if batches:
+                    if len(batches) > 1:
+                        raise UserError(
+                            "Selected deliveries belong to multiple batches.\n"
+                            "Please print Packing List from Batch."
+                        )
+
+                    return self.env.ref(
+                        "export_docs.action_packing_list_batch"
+                    ).with_context(
+                        wizard_data=wizard_data
+                    ).report_action(batches)
+
+                return self.env.ref(
+                    "export_docs.action_packing_list_delivery"
+                ).with_context(
+                    wizard_data=wizard_data
+                ).report_action(pickings)
+
+            if active_model == "stock.picking.batch":
+                batches = self.env["stock.picking.batch"].browse(active_ids)
+
+                return self.env.ref(
+                    "export_docs.action_packing_list_batch"
+                ).with_context(
+                    wizard_data=wizard_data
+                ).report_action(batches)
+
+            if active_model == "account.move":
+                invoices = self.env["account.move"].browse(active_ids)
+
+                pickings = invoices.mapped(
+                    "invoice_line_ids.sale_line_ids.order_id.picking_ids"
+                ).filtered(lambda p: p.state == "done" and p.picking_type_id.code == "outgoing")
+
+                if not pickings:
+                    raise UserError(
+                        "No completed delivery found for this invoice."
+                    )
+
+                batches = pickings.mapped("batch_id").filtered(lambda b: b)
+
+                if batches:
+                    if len(batches) == 1:
+                        return self.env.ref(
+                            "export_docs.action_packing_list_batch"
+                        ).with_context(
+                            wizard_data=wizard_data,
+                            invoice_id=invoices.id
+                        ).report_action(batches)
+
+                    raise UserError(
+                        "Invoice contains deliveries from multiple batches.\n"
+                        "Please print Packing List from Batch."
+                    )
+
+                if len(pickings) != 1:
+                    raise UserError(
+                        "Invoice has multiple deliveries.\n"
+                        "Please print Packing List from Delivery or Batch."
+                    )
+
+                return self.env.ref(
+                    "export_docs.action_packing_list_delivery"
+                ).with_context(
+                    wizard_data=wizard_data,
+                    invoice_id=invoices.id
+                ).report_action(pickings)
+
+            raise UserError("Packing List cannot be printed from this screen")
+
+        # ==================================================
+        # 📄 EXPORT / TAX INVOICE
+        # ==================================================
         xml_id = "export_docs.action_export_invoice_report" if self.report_type == "export" else "export_docs.action_tax_invoice_report"
 
         return self.env.ref(xml_id).with_context(
