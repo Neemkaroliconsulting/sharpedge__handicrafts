@@ -21,7 +21,7 @@ class DescriptionSelectWizard(models.TransientModel):
     line_ids = fields.Many2many(
     "account.move.line",
     string="Select Products",
-    domain="[('move_id', '=', context.get('active_id')), ('display_type', '=', False), ('tax_line_id', '=', False)]"
+   
 )
     output_format = fields.Selection(
         [
