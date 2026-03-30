@@ -21,7 +21,7 @@ class DescriptionSelectWizard(models.TransientModel):
     line_ids = fields.Many2many(
         "account.move.line",
         string="Select Products",
-        domain="[('display_type','=',False),('tax_line_id','=',False)]"
+        
     )
     output_format = fields.Selection(
         [
@@ -269,26 +269,22 @@ class DescriptionSelectWizard(models.TransientModel):
             wizard_data=wizard_data
         ).report_action(active_ids)
     
-    @api.model
-    def default_get(self, fields):
-        res = super().default_get(fields)
-    
-        active_ids = self.env.context.get("active_ids", [])
-        active_model = self.env.context.get("active_model")
-    
-        if active_model == "account.move" and active_ids:
+   allowed_line_ids = fields.Many2many(
+    "account.move.line",
+    compute="_compute_allowed_lines",
+    store=False
+)
+
+    @api.depends_context("active_ids")
+    def _compute_allowed_lines(self):
+        for wiz in self:
+            active_ids = self.env.context.get("active_ids", [])
             invoices = self.env["account.move"].browse(active_ids)
     
-            lines = invoices.mapped("invoice_line_ids")
-    
-            # ✅ FIXED FILTER (correct indent)
-            lines = lines.filtered(
-                lambda l: l.product_id 
-                and not l.display_type 
-                and not l.tax_line_id 
-                and l.move_id.id in active_ids
+            lines = invoices.mapped("invoice_line_ids").filtered(
+                lambda l: l.product_id
+                and not l.display_type
+                and not l.tax_line_id
             )
     
-            res["line_ids"] = [(6, 0, lines.ids)]
-    
-        return res
+            wiz.allowed_line_ids = lines
