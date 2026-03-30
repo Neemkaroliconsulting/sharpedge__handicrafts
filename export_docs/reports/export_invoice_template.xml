@@ -30,6 +30,7 @@
 
             <t t-foreach="docs" t-as="o">
                 <t t-set="wiz" t-value="o._context.get('wizard_data', {})" />
+                <t t-set="selected_ids" t-value="wiz.get('selected_line_ids', [])"/>
 
 
                 <!-- ================= CALCULATIONS ================= -->
