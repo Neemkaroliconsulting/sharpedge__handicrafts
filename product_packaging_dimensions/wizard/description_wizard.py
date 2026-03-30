@@ -18,11 +18,11 @@ class DescriptionSelectWizard(models.TransientModel):
         default="export",
         required=True,
     )
-   line_ids = fields.Many2many(
-    "account.move.line",
-    string="Select Products",
-    domain="[('display_type','=',False),('tax_line_id','=',False)]"
-)
+    line_ids = fields.Many2many(
+        "account.move.line",
+        string="Select Products",
+        domain="[('display_type','=',False),('tax_line_id','=',False)]"
+    )
     output_format = fields.Selection(
         [
             ('pdf', 'PDF'),
