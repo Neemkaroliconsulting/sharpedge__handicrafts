@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <form string="Packing List Cum Invoice (Export Printing)">
                 <group col="2">
+                    
                     <group string="Format">
                         <field name="report_type" widget="radio"/>
                     </group>
@@ -15,11 +16,11 @@
                         <field name="output_format" widget="radio"/>
                     </group>
 
+                    <!-- ✅ FIXED (NO DOMAIN) -->
                     <group>
-                      <field name="line_ids"
-       widget="many2many_checkboxes"
-       domain="[('id', 'in', allowed_line_ids)]"
-       options="{'no_create': True}"/>
+                        <field name="line_ids"
+                               widget="many2many_checkboxes"
+                               options="{'no_create': True}"/>
                     </group>
 
                     <group>
@@ -27,6 +28,7 @@
                         <field name="show_total_qty"/>
                         <field name="show_dimensions"/>
                     </group>
+
                 </group>
 
                 <group string="Summary (Show on Print)" col="2">
@@ -36,10 +38,13 @@
                 </group>
 
                 <footer>
-                    <button name="action_print_report" string="Print"
-                            type="object" class="btn-primary"/>
+                    <button name="action_print_report"
+                            string="Print"
+                            type="object"
+                            class="btn-primary"/>
                     <button string="Cancel" special="cancel"/>
                 </footer>
+
             </form>
         </field>
     </record>
