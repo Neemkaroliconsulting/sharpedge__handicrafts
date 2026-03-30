@@ -271,10 +271,20 @@ class DescriptionSelectWizard(models.TransientModel):
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
-
-        active_ids = self.env.context.get("active_ids")
-        if active_ids:
-            invoice = self.env["account.move"].browse(active_ids[0])
-            res["line_ids"] = [(6, 0, invoice.invoice_line_ids.ids)]
-
+    
+        active_ids = self.env.context.get("active_ids", [])
+        active_model = self.env.context.get("active_model")
+    
+        # ✅ Only when opening from Invoice
+        if active_model == "account.move" and active_ids:
+            invoices = self.env["account.move"].browse(active_ids)
+    
+            # 🔥 Get only invoice lines of selected invoice(s)
+            lines = invoices.mapped("invoice_line_ids")
+    
+            # ✅ Remove unwanted lines (sections, notes, taxes etc.)
+            lines = lines.filtered(lambda l: l.product_id and not l.display_type)
+    
+            res["line_ids"] = [(6, 0, lines.ids)]
+    
         return res
