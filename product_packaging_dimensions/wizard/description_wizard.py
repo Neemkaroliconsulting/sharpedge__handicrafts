@@ -283,8 +283,13 @@ class DescriptionSelectWizard(models.TransientModel):
             lines = invoices.mapped("invoice_line_ids")
     
             # ✅ Remove unwanted lines (sections, notes, taxes etc.)
-            lines = lines.filtered(lambda l: l.product_id and not l.display_type)
-    
+           lines = lines.filtered(
+                lambda l: l.product_id 
+                and not l.display_type 
+                and not l.tax_line_id 
+                and l.move_id.id in active_ids
+            )
+                
             res["line_ids"] = [(6, 0, lines.ids)]
     
         return res
