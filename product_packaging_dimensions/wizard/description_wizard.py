@@ -75,15 +75,19 @@ class DescriptionSelectWizard(models.TransientModel):
     # DEFAULT LINES (MAIN FIX)
     # ==================================================
     def _get_default_lines(self):
-        active_ids = self.env.context.get("active_ids", [])
-        invoices = self.env["account.move"].browse(active_ids)
-
-        lines = invoices.mapped("invoice_line_ids").filtered(
+        active_id = self.env.context.get("active_id")
+    
+        if not active_id:
+            return [(5, 0, 0)]
+    
+        invoice = self.env["account.move"].browse(active_id)
+    
+        lines = invoice.invoice_line_ids.filtered(
             lambda l: l.product_id
             and not l.display_type
             and not l.tax_line_id
         )
-
+    
         return [(6, 0, lines.ids)]
 
     # ==================================================
