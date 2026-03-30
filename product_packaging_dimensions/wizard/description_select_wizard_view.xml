@@ -18,9 +18,7 @@
                     <group>
                       <field name="line_ids"
        widget="many2many_checkboxes"
-       domain="[('move_id', 'in', context.get('active_ids', [])),
-                ('display_type', '=', False),
-                ('tax_line_id', '=', False)]"
+       domain="[('id', 'in', allowed_line_ids)]"
        options="{'no_create': True}"/>
                     </group>
 
