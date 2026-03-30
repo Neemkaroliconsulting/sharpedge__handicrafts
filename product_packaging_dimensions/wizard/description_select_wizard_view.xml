@@ -16,8 +16,10 @@
                     </group>
 
                     <group>
-                        <field name="line_ids" widget="many2many_checkboxes"
-                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="line_ids"
+                               widget="many2many_checkboxes"
+                               domain="[('move_id', '=', active_id), ('display_type', '=', False), ('tax_line_id', '=', False)]"
+                               options="{'no_create': True}"/>
                     </group>
 
                     <group>
