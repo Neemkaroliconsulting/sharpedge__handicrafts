@@ -96,7 +96,7 @@ class DescriptionSelectWizard(models.TransientModel):
         lambda l: (
             not l.display_type and
             l.product_id and
-            l.quantity > 0
+            not l.tax_ids   # ❌ GST remove
         )
     )
 
