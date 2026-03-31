@@ -27,7 +27,8 @@ class DescriptionSelectWizard(models.TransientModel):
     "wizard_line_rel",
     "wizard_id",
     "line_id",
-    string="Select Products"
+    string="Select Products",
+    domain="[('move_id', '=', context.get('active_id'))]"
 )
 
     
