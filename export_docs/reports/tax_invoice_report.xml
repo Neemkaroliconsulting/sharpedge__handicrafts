@@ -568,14 +568,14 @@
 
                                         </td>
 
-                                        <td class="align">
+                                        <td align="right">
     <t t-if="o.fiscal_position_id.name == 'Export - LUT (WOP)'">0</t>
     <t t-else="">
         <t t-esc="line.tax_ids and line.tax_ids[0].amount or 0" />
     </t>
 </td>
 
-                                        <td align="right">
+<td align="right">
     <t t-if="o.fiscal_position_id.name == 'Export - LUT (WOP)'">0.00</t>
     <t t-else="">
         <t t-esc="round(
