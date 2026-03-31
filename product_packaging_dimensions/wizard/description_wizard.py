@@ -166,7 +166,7 @@ class DescriptionSelectWizard(models.TransientModel):
             "show_net_amount": self.show_net_amount,
             "show_net_cf": self.show_net_cf,
             "show_net_cif": self.show_net_cif,
-            "selected_line_ids": self.line_ids.ids
+            
         }
 
         # ================= PDF =================
