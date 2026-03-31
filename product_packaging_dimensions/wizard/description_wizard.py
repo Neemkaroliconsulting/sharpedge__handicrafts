@@ -22,14 +22,14 @@ class DescriptionSelectWizard(models.TransientModel):
     # ==================================================
     # ✅ MAIN PRODUCT SELECTION (FINAL FIX)
     # ==================================================
-    line_ids = fields.Many2many(
-    "account.move.line",
-    "wizard_line_rel",
-    "wizard_id",
-    "line_id",
-    string="Select Products",
-    domain="[('move_id', '=', context.get('active_id'))]"
-)
+#     line_ids = fields.Many2many(
+#     "account.move.line",
+#     "wizard_line_rel",
+#     "wizard_id",
+#     "line_id",
+#     string="Select Products",
+#     domain="[('move_id', '=', context.get('active_id'))]"
+# )
 
     
 
@@ -81,34 +81,34 @@ class DescriptionSelectWizard(models.TransientModel):
     # ==================================================
     # ✅ FINAL CONTROL (MAIN LOGIC)
     # ==================================================
-    @api.model
-    def default_get(self, fields):
-        res = super().default_get(fields)
+    # @api.model
+    # def default_get(self, fields):
+    #     res = super().default_get(fields)
 
-        active_ids = self.env.context.get("active_ids")
-        if not active_ids:
-            return res
+    #     active_ids = self.env.context.get("active_ids")
+    #     if not active_ids:
+    #         return res
 
-        invoice = self.env["account.move"].browse(active_ids[0])
+    #     invoice = self.env["account.move"].browse(active_ids[0])
 
-        # 🔥 PERFECT FILTER
-        lines = invoice.invoice_line_ids.filtered(
-        lambda l: (
-            not l.display_type and
-            l.product_id and
-            not l.tax_ids   # ❌ GST remove
-        )
-    )
+    #     # 🔥 PERFECT FILTER
+    #     lines = invoice.invoice_line_ids.filtered(
+    #     lambda l: (
+    #         not l.display_type and
+    #         l.product_id and
+    #         not l.tax_ids   # ❌ GST remove
+    #     )
+    # )
 
-        res["line_ids"] = [(6, 0, lines.ids)]
+    #     res["line_ids"] = [(6, 0, lines.ids)]
 
-        # ✅ SET BOTH (VERY IMPORTANT)
-        res.update({
-        "line_ids": [(6, 0, lines.ids)],
+    #     # ✅ SET BOTH (VERY IMPORTANT)
+    #     res.update({
+    #     "line_ids": [(6, 0, lines.ids)],
         
-    })
+    # })
 
-        return res
+    #     return res
 
     # ==================================================
     # PACKAGING FILTER (UNCHANGED)
