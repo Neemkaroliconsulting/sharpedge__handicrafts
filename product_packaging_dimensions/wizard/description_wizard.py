@@ -87,13 +87,11 @@ class DescriptionSelectWizard(models.TransientModel):
         if active_id:
             invoice = self.env["account.move"].browse(active_id)
     
-            # ✅ ONLY REAL PRODUCT LINES
+            # ✅ CORRECT FILTER
             lines = invoice.invoice_line_ids.filtered(
                 lambda l: (
-                    not l.display_type            # remove section/note
-                    and not l.tax_line_id         # remove tax lines
-                    and l.product_id              # only product
-                    and l.quantity > 0            # optional (no zero qty)
+                    not l.display_type        # remove section/note
+                    and l.product_id          # only product
                 )
             )
     
