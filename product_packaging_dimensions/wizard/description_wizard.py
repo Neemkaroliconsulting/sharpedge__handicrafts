@@ -24,19 +24,13 @@ class DescriptionSelectWizard(models.TransientModel):
     # ==================================================
     line_ids = fields.Many2many(
     "account.move.line",
-    "wizard_line_rel",        # 🔥 relation table
+    "wizard_line_rel",
     "wizard_id",
     "line_id",
-    string="Select Products",
-    domain="[('id', 'in', allowed_line_ids)]"
+    string="Select Products"
 )
 
-    allowed_line_ids = fields.Many2many(
-        "account.move.line",
-        "wizard_allowed_line_rel",   # 🔥 DIFFERENT table
-        "wizard_id",
-        "line_id",
-    )
+    
 
     # ==================================================
     # OUTPUT FORMAT
@@ -98,12 +92,14 @@ class DescriptionSelectWizard(models.TransientModel):
 
         # 🔥 PERFECT FILTER
         lines = invoice.invoice_line_ids.filtered(
-            lambda l: (
-                not l.display_type and
-                l.product_id and
-                l.quantity > 0
-            )
+        lambda l: (
+            not l.display_type and
+            l.product_id and
+            l.quantity > 0
         )
+    )
+
+res["line_ids"] = [(6, 0, lines.ids)]
 
         # ✅ SET BOTH (VERY IMPORTANT)
         res.update({
