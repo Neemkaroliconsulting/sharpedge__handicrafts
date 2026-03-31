@@ -21,10 +21,10 @@ class DescriptionSelectWizard(models.TransientModel):
 
     # ✅ FIXED (REMOVED WRONG DEFAULT)
     line_ids = fields.Many2many(
-        "account.move.line",
-        string="Select Products"
-    )
-
+    "account.move.line",
+    string="Select Products",
+    domain="[('move_id', '=', context.get('active_id'))]"
+)
     output_format = fields.Selection(
         [
             ('pdf', 'PDF'),
@@ -75,12 +75,18 @@ class DescriptionSelectWizard(models.TransientModel):
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
-
-        active_ids = self.env.context.get("active_ids")
-        if active_ids:
-            invoice = self.env["account.move"].browse(active_ids[0])
-            res["line_ids"] = [(6, 0, invoice.invoice_line_ids.ids)]
-
+    
+        active_id = self.env.context.get("active_id")
+        if active_id:
+            invoice = self.env["account.move"].browse(active_id)
+    
+            # ✅ ONLY PRODUCT LINES (NO TAX / FREIGHT)
+            lines = invoice.invoice_line_ids.filtered(
+                lambda l: not l.display_type and l.product_id
+            )
+    
+            res["line_ids"] = [(6, 0, lines.ids)]
+    
         return res
 
     # ==================================================
