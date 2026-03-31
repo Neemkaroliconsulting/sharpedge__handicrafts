@@ -17,11 +17,11 @@
                     </group>
 
                     <!-- ✅ FIXED (NO DOMAIN) -->
-                    <group>
+                    <!-- <group>
                         <field name="line_ids"
                                widget="many2many_checkboxes"
                                options="{'no_create': True}"/>
-                    </group>
+                    </group> -->
 
                     <group>
                         <field name="show_pcs_per_box"/>
