@@ -1,4 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
+ <record id="action_tax_invoice_report" model="ir.actions.report">
+
+        <field name="name">Tax Invoice (Export)</field>
+
+        <field name="model">account.move</field>
+
+        <field name="report_type">qweb-pdf</field>
+
+        <field name="report_name">export_docs.tax_invoice_template</field>
+
+        <field name="report_file">export_docs.tax_invoice_template</field>
+
+        <field name="binding_model_id" ref="account.model_account_move" />
+
+        <field name="binding_type">report</field>
+
+        <field name="paperformat_id" ref="export_docs.paperformat_export_a4" />
+
+    </record>
+
+
 <odoo>
     <template id="tax_invoice_template" t-name="export_docs.tax_invoice_template">
         <t t-call="web.basic_layout">
