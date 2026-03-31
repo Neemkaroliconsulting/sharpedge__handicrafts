@@ -105,7 +105,7 @@ class DescriptionSelectWizard(models.TransientModel):
         # ✅ SET BOTH (VERY IMPORTANT)
         res.update({
         "line_ids": [(6, 0, lines.ids)],
-        "allowed_line_ids": [(6, 0, lines.ids)]
+        
     })
 
         return res
