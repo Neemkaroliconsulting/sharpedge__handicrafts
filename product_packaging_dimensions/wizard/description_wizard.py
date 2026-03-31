@@ -19,23 +19,36 @@ class DescriptionSelectWizard(models.TransientModel):
         required=True,
     )
 
-    # ✅ FIXED (REMOVED WRONG DEFAULT)
+    # ==================================================
+    # ✅ MAIN PRODUCT SELECTION (FIXED)
+    # ==================================================
     line_ids = fields.Many2many(
-    "account.move.line",
-    string="Select Products"
-)
+        "account.move.line",
+        string="Select Products",
+        domain="[('id', 'in', allowed_line_ids)]"
+    )
+
+    # 🔥 Helper field (IMPORTANT)
+    allowed_line_ids = fields.Many2many(
+        "account.move.line",
+        compute="_compute_allowed_lines",
+        store=False
+    )
+
+    # ==================================================
+    # OUTPUT FORMAT
+    # ==================================================
     output_format = fields.Selection(
         [
             ('pdf', 'PDF'),
             ('excel', 'Excel'),
         ],
-        string="Report Format",
         default='pdf',
         required=True
     )
 
     # ==================================================
-    # ITEM DESCRIPTION
+    # DESCRIPTION MODE
     # ==================================================
     description_mode = fields.Selection(
         [
@@ -43,7 +56,6 @@ class DescriptionSelectWizard(models.TransientModel):
             ("buyer", "Buyer’s Custom"),
             ("foreign", "Foreign Language"),
         ],
-        string="Item Description",
     )
 
     # ==================================================
@@ -51,7 +63,7 @@ class DescriptionSelectWizard(models.TransientModel):
     # ==================================================
     packaging_id = fields.Many2one(
         "product.packaging",
-        string="Packaging (Carton Type)",
+        string="Packaging",
         domain="[('id', 'in', allowed_packaging_ids)]",
     )
 
@@ -69,27 +81,55 @@ class DescriptionSelectWizard(models.TransientModel):
     show_net_cif = fields.Boolean()
 
     # ==================================================
-    # ✅ DEFAULT LINES (MAIN LOGIC)
+    # ✅ COMPUTE ONLY CURRENT INVOICE LINES
+    # ==================================================
+    @api.depends_context("active_ids")
+    def _compute_allowed_lines(self):
+        for wiz in self:
+            wiz.allowed_line_ids = False
+
+            active_ids = self.env.context.get("active_ids")
+            if not active_ids:
+                continue
+
+            invoice = self.env["account.move"].browse(active_ids[0])
+
+            # 🔥 FINAL FILTER
+            lines = invoice.invoice_line_ids.filtered(
+                lambda l: (
+                    not l.display_type and
+                    l.product_id and
+                    l.quantity > 0
+                )
+            )
+
+            wiz.allowed_line_ids = [(6, 0, lines.ids)]
+
+    # ==================================================
+    # ✅ DEFAULT SELECT SAME LINES
     # ==================================================
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
-    
+
         active_ids = self.env.context.get("active_ids")
-    
         if active_ids:
             invoice = self.env["account.move"].browse(active_ids[0])
-    
-            # ✅ CLEAN FILTER
+
             lines = invoice.invoice_line_ids.filtered(
-                lambda l: not l.display_type and l.product_id
+                lambda l: (
+                    not l.display_type and
+                    l.product_id and
+                    l.quantity > 0
+                )
             )
-    
+
             res["line_ids"] = [(6, 0, lines.ids)]
-    
+
         return res
+
     # ==================================================
-    # COMPUTE PACKAGING
+    # PACKAGING FILTER (UNCHANGED)
     # ==================================================
     @api.depends_context("active_model", "active_ids")
     def _compute_allowed_packaging_ids(self):
