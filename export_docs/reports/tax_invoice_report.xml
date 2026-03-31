@@ -302,6 +302,11 @@
                             </tr>
                         </tbody>
                     </table>
+                    <t t-foreach="range(8)" t-as="i">
+                                <tr class="blank-row">
+                                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                </tr>
+                            </t>
 
                     <table style="width:100%;">
                         <tr>
@@ -406,6 +411,13 @@
                                 </tr>
                             </t>
                         </tbody>
+                    </table>
+                    <table style="width:100%; border-top:none;">
+                        <tr>
+                            <td class="text-right" style="padding:6px; font-style: italic;">
+                                <strong>Exchange Rate Applied : 1 <t t-esc="inv_currency.name" /> = <t t-esc="round(inv_to_comp_rate, 4)" /> <t t-esc="comp_currency.name" /></strong>
+                            </td>
+                        </tr>
                     </table>
 
                     <table style="width:100%; border-top:none;">
