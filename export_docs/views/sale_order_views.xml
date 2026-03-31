@@ -66,7 +66,7 @@
         </field>
     </record>
 
-<record id="view_order_form_line_checkbox" model="ir.ui.view">
+<!-- <record id="view_order_form_line_checkbox" model="ir.ui.view">
     <field name="name">sale.order.form.line.checkbox</field>
     <field name="model">sale.order</field>
     <field name="inherit_id" ref="sale.view_order_form"/>
@@ -78,6 +78,6 @@
 
     </field>
 </record>
-
+ -->
 
 </odoo>
