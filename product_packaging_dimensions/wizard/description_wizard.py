@@ -99,7 +99,7 @@ class DescriptionSelectWizard(models.TransientModel):
         )
     )
 
-res["line_ids"] = [(6, 0, lines.ids)]
+        res["line_ids"] = [(6, 0, lines.ids)]
 
         # ✅ SET BOTH (VERY IMPORTANT)
         res.update({
