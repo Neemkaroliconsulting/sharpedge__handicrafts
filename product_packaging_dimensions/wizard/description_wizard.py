@@ -23,14 +23,19 @@ class DescriptionSelectWizard(models.TransientModel):
     # ✅ MAIN PRODUCT SELECTION (FINAL FIX)
     # ==================================================
     line_ids = fields.Many2many(
-        "account.move.line",
-        string="Select Products",
-        domain="[('id', 'in', allowed_line_ids)]"
-    )
+    "account.move.line",
+    "wizard_line_rel",        # 🔥 relation table
+    "wizard_id",
+    "line_id",
+    string="Select Products",
+    domain="[('id', 'in', allowed_line_ids)]"
+)
 
-    # 🔥 NO COMPUTE (IMPORTANT FIX)
     allowed_line_ids = fields.Many2many(
-        "account.move.line"
+        "account.move.line",
+        "wizard_allowed_line_rel",   # 🔥 DIFFERENT table
+        "wizard_id",
+        "line_id",
     )
 
     # ==================================================
