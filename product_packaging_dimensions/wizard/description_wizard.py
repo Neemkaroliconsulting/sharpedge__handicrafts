@@ -22,14 +22,7 @@ class DescriptionSelectWizard(models.TransientModel):
     # ✅ FIXED (REMOVED WRONG DEFAULT)
     line_ids = fields.Many2many(
     "account.move.line",
-    string="Select Products",
-    domain="""
-        [
-            ('move_id', '=', context.get('active_id')),
-            ('display_type', '=', False),
-            ('product_id', '!=', False)
-        ]
-    """
+    string="Select Products"
 )
     output_format = fields.Selection(
         [
@@ -82,16 +75,14 @@ class DescriptionSelectWizard(models.TransientModel):
     def default_get(self, fields):
         res = super().default_get(fields)
     
-        active_id = self.env.context.get("active_id")
-        if active_id:
-            invoice = self.env["account.move"].browse(active_id)
+        active_ids = self.env.context.get("active_ids")
     
-            # ✅ CORRECT FILTER
+        if active_ids:
+            invoice = self.env["account.move"].browse(active_ids[0])
+    
+            # ✅ CLEAN FILTER
             lines = invoice.invoice_line_ids.filtered(
-                lambda l: (
-                    not l.display_type        # remove section/note
-                    and l.product_id          # only product
-                )
+                lambda l: not l.display_type and l.product_id
             )
     
             res["line_ids"] = [(6, 0, lines.ids)]
