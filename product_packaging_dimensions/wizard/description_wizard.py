@@ -23,7 +23,14 @@ class DescriptionSelectWizard(models.TransientModel):
     line_ids = fields.Many2many(
     "account.move.line",
     string="Select Products",
-    domain="[('move_id', '=', context.get('active_id'))]"
+    domain="""
+        [
+            ('move_id', '=', context.get('active_id')),
+            ('display_type', '=', False),
+            ('tax_line_id', '=', False),
+            ('product_id', '!=', False)
+        ]
+    """
 )
     output_format = fields.Selection(
         [
@@ -80,15 +87,19 @@ class DescriptionSelectWizard(models.TransientModel):
         if active_id:
             invoice = self.env["account.move"].browse(active_id)
     
-            # ✅ ONLY PRODUCT LINES (NO TAX / FREIGHT)
+            # ✅ ONLY REAL PRODUCT LINES
             lines = invoice.invoice_line_ids.filtered(
-                lambda l: not l.display_type and l.product_id
+                lambda l: (
+                    not l.display_type            # remove section/note
+                    and not l.tax_line_id         # remove tax lines
+                    and l.product_id              # only product
+                    and l.quantity > 0            # optional (no zero qty)
+                )
             )
     
             res["line_ids"] = [(6, 0, lines.ids)]
     
         return res
-
     # ==================================================
     # COMPUTE PACKAGING
     # ==================================================
