@@ -23,7 +23,7 @@ class DescriptionSelectWizard(models.TransientModel):
     line_ids = fields.Many2many(
         "account.move.line",
         string="Select Products",
-        default=lambda self: self._get_default_lines()
+        default=lambda self: self._get_default()
     )
 
     output_format = fields.Selection(
