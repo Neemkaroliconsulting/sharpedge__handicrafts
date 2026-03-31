@@ -20,7 +20,7 @@ class DescriptionSelectWizard(models.TransientModel):
     )
 
     # ==================================================
-    # ✅ MAIN PRODUCT SELECTION (FIXED)
+    # ✅ MAIN PRODUCT SELECTION (FINAL FIX)
     # ==================================================
     line_ids = fields.Many2many(
         "account.move.line",
@@ -28,11 +28,9 @@ class DescriptionSelectWizard(models.TransientModel):
         domain="[('id', 'in', allowed_line_ids)]"
     )
 
-    # 🔥 Helper field (IMPORTANT)
+    # 🔥 NO COMPUTE (IMPORTANT FIX)
     allowed_line_ids = fields.Many2many(
-        "account.move.line",
-        compute="_compute_allowed_lines",
-        store=False
+        "account.move.line"
     )
 
     # ==================================================
@@ -81,50 +79,30 @@ class DescriptionSelectWizard(models.TransientModel):
     show_net_cif = fields.Boolean()
 
     # ==================================================
-    # ✅ COMPUTE ONLY CURRENT INVOICE LINES
-    # ==================================================
-    @api.depends_context("active_ids")
-    def _compute_allowed_lines(self):
-        for wiz in self:
-            wiz.allowed_line_ids = False
-
-            active_ids = self.env.context.get("active_ids")
-            if not active_ids:
-                continue
-
-            invoice = self.env["account.move"].browse(active_ids[0])
-
-            # 🔥 FINAL FILTER
-            lines = invoice.invoice_line_ids.filtered(
-                lambda l: (
-                    not l.display_type and
-                    l.product_id and
-                    l.quantity > 0
-                )
-            )
-
-            wiz.allowed_line_ids = [(6, 0, lines.ids)]
-
-    # ==================================================
-    # ✅ DEFAULT SELECT SAME LINES
+    # ✅ FINAL CONTROL (MAIN LOGIC)
     # ==================================================
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
 
         active_ids = self.env.context.get("active_ids")
-        if active_ids:
-            invoice = self.env["account.move"].browse(active_ids[0])
+        if not active_ids:
+            return res
 
-            lines = invoice.invoice_line_ids.filtered(
-                lambda l: (
-                    not l.display_type and
-                    l.product_id and
-                    l.quantity > 0
-                )
+        invoice = self.env["account.move"].browse(active_ids[0])
+
+        # 🔥 PERFECT FILTER
+        lines = invoice.invoice_line_ids.filtered(
+            lambda l: (
+                not l.display_type and
+                l.product_id and
+                l.quantity > 0
             )
+        )
 
-            res["line_ids"] = [(6, 0, lines.ids)]
+        # ✅ SET BOTH (VERY IMPORTANT)
+        res["line_ids"] = [(6, 0, lines.ids)]
+        res["allowed_line_ids"] = [(6, 0, lines.ids)]
 
         return res
 
