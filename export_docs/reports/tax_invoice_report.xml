@@ -16,7 +16,7 @@
         <t t-call="web.basic_layout">
             <link rel="stylesheet" href="/export_docs/static/css/tax_style.css"/>
             <t t-foreach="docs" t-as="o">
-                
+
                 <t t-set="is_lut" t-value="o.fiscal_position_id and o.fiscal_position_id.name == 'Export - LUT (WOP)'"/>
                 <t t-set="wiz" t-value="o._context.get('wizard_data', {})" />
 
@@ -27,131 +27,333 @@
                 <t t-set="inv_to_comp_rate"
                     t-value="inv_currency._get_conversion_rate(inv_currency, comp_currency, o.company_id, o.invoice_date or o.date) or 0.0" />
 
-                <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service')" />
-                <t t-set="freight_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type == 'service' and 'freight' in (l.product_id.name or '').lower())" />
-                <t t-set="insurance_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type == 'service' and 'insurance' in (l.product_id.name or '').lower())" />
+                <t t-set="insurance_lines"
+                    t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type == 'service' and 'insurance' in (l.product_id.name or '').lower())" />
+
+                <t t-set="product_lines"
+                    t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service')" />
+
+                <t t-set="freight_lines"
+                    t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type == 'service' and 'freight' in (l.product_id.name or '').lower())" />
 
                 <t t-set="goods_total" t-value="sum(product_lines.mapped('price_subtotal'))" />
+                
+                <t t-set="gst_amount"
+                    t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and not (l.product_id.type != 'service' and is_lut)).mapped(lambda l: l.price_subtotal * (l.tax_ids and l.tax_ids[0].amount or 0) / 100))" />
+
+                <t t-set="discount_amount" t-value="sum(((l.quantity * l.price_unit) * (l.discount or 0) / 100) for l in product_lines)" />
                 <t t-set="freight_total" t-value="sum(freight_lines.mapped('price_subtotal'))" />
                 <t t-set="insurance_total" t-value="sum(insurance_lines.mapped('price_subtotal'))" />
-
-                <t t-set="gst_amount" t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and not (l.product_id.type != 'service' and is_lut)).mapped(lambda l: l.price_subtotal * (l.tax_ids and l.tax_ids[0].amount or 0) / 100))" />
-                <t t-set="total_igst" t-value="gst_amount * inv_to_comp_rate" />
                 
+                <t t-set="total_igst" t-value="gst_amount * inv_to_comp_rate" />
+                <t t-set="net_cf" t-value="goods_total + freight_total" />
+                <t t-set="net_cif_inv" t-value="net_cf + insurance_total" />
+                <t t-set="net_amount_incl_gst" t-value="(o.amount_total * inv_to_comp_rate)" />
+
                 <div class="page">
                     <style> 
+                        thead { display: table-header-group; } tr { page-break-inside: avoid; }
                         table { width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: "Times New Roman", serif; } 
-                        td, th { border: 1px solid #000; padding: 2px 3px; vertical-align: top; }
-                        .blank-row td { border-left: 1px solid #000; border-right: 1px solid #000; border-top: none; border-bottom: none; height: 16px; }
+                        td, th { border: 1px solid #000; padding: 2px 3px; vertical-align: top; line-height: 1.2; }
+                        .blank-row td { border-left: 1px solid #000; border-right: 1px solid #000; border-top: none; border-bottom: none; height: 16px; } 
                         table.hsn-table td, table.hsn-table th { border: none; padding: 3px 5px; } 
                         table.hsn-table th { background: #f2f2f2; font-weight: bold; }
                     </style>
 
-                    <h3 class="text-center" style="text-align:center;">TAX INVOICE</h3>
+                    <h3 class="text-center" style="margin:0; text-align:center;">TAX INVOICE</h3>
 
+                    <t t-set="buyer_orders" t-value="[]" />
+                    <t t-foreach="o.invoice_line_ids" t-as="l">
+                        <t t-foreach="l.sale_line_ids" t-as="sl">
+                            <t t-if="sl.order_id and sl.order_id.buyer_order_no and sl.order_id.buyer_order_no not in buyer_orders">
+                                <t t-set="buyer_orders" t-value="buyer_orders + [sl.order_id.buyer_order_no]" />
+                            </t>
+                        </t>
+                    </t>
+
+                   <!-- ================= HEADER ================= -->
                     <table>
+                        <!-- ROW 1 : EXPORTER + INVOICE DETAILS -->
                         <tr>
                             <td width="50%">
-                                <strong>Exporter: <t t-esc="o.company_id.name" /></strong><br/>
-                                <t t-esc="o.company_id.street" />, <t t-esc="o.company_id.city" /><br/>
-                                <strong>GSTIN:</strong> <t t-esc="o.company_id.vat" />
+                                <table width="100%" style="border:none;">
+                                    <tr>
+
+                                        <td width="25%"
+                                            style="border:none;  vertical-align:top;">
+                                            <strong>Exporter</strong>
+                                            <t t-if="o.company_id.logo">
+                                                <img t-att-src="image_data_uri(o.company_id.logo)"
+                                                    style="max-height:40px; max-width:70px;" />
+                                            </t>
+                                        </td>
+                                        <td width="75%" style="border:none;">
+
+                                            <br />
+                                            <strong>
+                                                <t t-esc="o.company_id.name" />
+                                            </strong>
+                                            <br />
+                                            <t t-esc="o.company_id.street" />
+                                            <t t-esc="o.company_id.city" />
+                                            <br />
+                                            <t t-esc="o.company_id.country_id.name" />
+                                            <br />
+                                            <strong>GSTIN:</strong>
+                                            <t t-esc="o.company_id.vat" />
+                                        </td>
+
+
+                                    </tr>
+                                </table>
+
                             </td>
+
                             <td width="50%">
-                                <strong>Invoice No:</strong> <t t-esc="o.name" /><br/>
-                                <strong>Date:</strong> <t t-esc="o.invoice_date" />
+                                <strong>Invoice No:</strong>
+                                <t t-esc="o.name" />
+                                <br />
+                                <strong>Date:</strong>
+                                <t t-esc="o.invoice_date" />
+                                <br />
+                                <strong>Exporter Ref:</strong>
+                                <t t-esc="o.exporter_reference" />
+                                <br />
+                                <strong>Buyer Order No:</strong>
+                                <t t-esc="' / '.join(buyer_orders)" />
+                            </td>
+                        </tr>
+
+                        <!-- ROW 2 : CONSIGNEE + BUYER -->
+                        <tr>
+                            <td width="50%">
+                                <strong>Consignee</strong>
+                                <br />
+                                <strong>
+                                    <t t-esc="o.consignee_id.name" />
+                                </strong>
+                                <br />
+                                <t t-esc="o.consignee_id.street" />
+                                <t t-esc="o.consignee_id.city" />
+                                <br />
+                                <t t-esc="o.consignee_id.country_id.name" />
+                            </td>
+
+                            <td width="50%">
+                                <strong>Buyer (if other than consignee)</strong>
+                                <br />
+                                <t t-esc="o.buyer_id.name" />
+                            </td>
+                        </tr>
+
+                        <!-- ROW 3 : ORIGIN + DESTINATION -->
+                        <tr>
+                            <td> Country of Origin<br />
+            <strong>
+                                    <t t-esc="o.country_origin_id.name" />
+                                </strong>
+                            </td>
+                            <td> Final Destination<br />
+            <strong>
+                                    <t t-esc="o.country_destination_id.name" />
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <!-- ROW 4 : SHIPPING -->
+                        <tr>
+                            <td> Pre-Carriage By<br />
+            <strong>
+                                    <t t-esc="o.pre_carriage_by" />
+                                </strong>
+                            </td>
+                            <td> Place of Receipt<br />
+            <strong>
+                                    <t t-esc="o.place_of_receipt" />
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td> Port of Loading<br />
+            <strong>
+                                    <t t-esc="o.port_loading" />
+                                </strong>
+                            </td>
+                            <td> Port of Discharge<br />
+            <strong>
+                                    <t t-esc="o.port_discharge" />
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <!-- ROW 5 : TERMS -->
+                        <tr>
+                            <td colspan="2"> Terms of Delivery &amp; Payment<br />
+            <t
+                                    t-esc="o.terms_delivery" /> / <t t-esc="o.payment_terms_export" />
                             </td>
                         </tr>
                     </table>
 
-                    <table style="width:100%; margin-top:10px;">
+
+
+                    <t t-set="grouped_lines" t-value="{}" />
+                    <t t-foreach="o.invoice_line_ids" t-as="l">
+                        <t t-if="l.show_in_invoice and l.product_id and l.product_id.type != 'service'">
+                            <t t-set="bo" t-value="(l.sale_line_ids and l.sale_line_ids[0].order_id.buyer_order_no) or 'NO BUYER ORDER'" />
+                            <t t-set="current" t-value="grouped_lines.get(bo, [])" />
+                            <t t-set="grouped_lines" t-value="dict(grouped_lines, **{bo: current + [l]})" />
+                        </t>
+                    </t>
+
+                    <table style="width:100%;" class="item-table">
                         <thead>
-                            <tr style="background:#f2f2f2;">
-                                <th>Sr</th>
-                                <th>Description of Goods</th>
-                                <th>HSN</th>
-                                <th>Qty</th>
-                                <th>Rate</th>
-                                <th>Amount (<t t-esc="inv_currency.name" />)</th>
-                                <th>GST %</th>
-                                <th>GST Amt (INR)</th>
+                            <tr>
+                                <th width="4%">Sr</th>
+                                <th width="14%">Item Ref</th>
+                                <th width="22%">Description of Goods</th>
+                                <th width="8%">HSN</th>
+                                <th width="8%">Qty</th>
+                                <th width="8%">Rate</th>
+                                <th width="10%"> Amount (<t t-esc="o.currency_id.name" />)</th>
+                                <th width="10%"> Taxable (INR)</th>
+                                <th width="6%">GST %</th>
+                                <th width="16%"> GST Amount (INR)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <t t-set="sr" t-value="1" />
-                            <t t-foreach="o.invoice_line_ids" t-as="line">
-                                <t t-if="line.show_in_invoice">
+                            <t t-foreach="grouped_lines.items()" t-as="grp">
+                                <tr style="height:28px;"><td colspan="100%" style="font-weight:bold; background:#f2f2f2;">Buyer Order No : <t t-esc="grp[0]" /></td></tr>
+                                <t t-foreach="grp[1]" t-as="line">
                                     <tr>
-                                        <td align="center"><t t-esc="sr" /></td>
-                                        <td><t t-esc="line.name" /></td>
-                                        <td align="center"><t t-esc="line.product_id.l10n_in_hsn_code" /></td>
+                                        <td><t t-esc="sr" /></td>
+                                        <td>
+                                            <t t-set="tmpl"
+                                                t-value="line.product_id.product_tmpl_id" />
+                                            <t t-set="partner" t-value="o.partner_id" />
+
+                                            <t t-set="mapping"
+                                                t-value="tmpl.customer_sku_ids.filtered(
+                                                lambda m: m.customer_id == partner
+                                            )" />
+
+                                            <t
+                                                t-if="wiz.get('description_mode') == 'buyer' and mapping">
+                                                <t t-esc="mapping[0].buyer_sku" />
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="line.product_id.default_code or ''" />
+                                            </t>
+                                        </td>
+
+
+                                        <td>
+                                            <t t-set="tmpl"
+                                                t-value="line.product_id.product_tmpl_id" />
+                                            <t t-set="partner" t-value="o.partner_id" />
+
+                                            <t t-set="mapping"
+                                                t-value="tmpl.customer_sku_ids.filtered(
+                                                    lambda m: m.customer_id == partner
+                                                )" />
+
+                                            <!-- BUYER / CUSTOMER DESCRIPTION -->
+                                            <t
+                                                t-if="wiz.get('description_mode') == 'buyer' and mapping">
+                                                <t t-esc="mapping[0].customer_description" />
+                                            </t>
+
+                                            <!-- EXPORT DESCRIPTION -->
+                                            <t
+                                                t-elif="wiz.get('description_mode') == 'export' and tmpl.export_description">
+                                                <t t-esc="tmpl.export_description" />
+                                            </t>
+
+                                            <!-- FOREIGN DESCRIPTION -->
+                                            <t
+                                                t-elif="wiz.get('description_mode') == 'foreign' and tmpl.foreign_description">
+                                                <t t-esc="tmpl.foreign_description" />
+                                            </t>
+
+                                            <!-- FALLBACK -->
+                                            <t t-else="">
+                                                <t t-esc="line.name" />
+                                            </t>
+                                        </td>
+                                        <td align="right"><t t-esc="line.product_id.l10n_in_hsn_code" /></td>
                                         <td align="right"><t t-esc="line.quantity" /></td>
-                                        <td align="right"><t t-esc="line.price_unit" /></td>
-                                        <td align="right"><t t-esc="line.price_subtotal" /></td>
-                                        <td align="right">
-                                            <t t-if="line.product_id.type != 'service' and is_lut">0.0</t>
-                                            <t t-else=""><t t-esc="line.tax_ids[0].amount if line.tax_ids else 0"/></t>
-                                        </td>
-                                        <td align="right">
-                                            <t t-if="line.product_id.type != 'service' and is_lut">0.00</t>
-                                            <t t-else=""><t t-esc="round((line.price_subtotal * (line.tax_ids[0].amount / 100 if line.tax_ids else 0)) * inv_to_comp_rate, 2)"/></t>
-                                        </td>
+                                        <td align="right"><t t-esc="round(line.price_unit,2)" /></td>
+                                        <td align="right"><t t-esc="round(line.price_subtotal,2)" /></td>
+                                        <td align="right"><t t-esc="round(line.price_subtotal * inv_to_comp_rate, 2)" /></td>
+                                        <td align="right"><t t-esc="(line.product_id.type != 'service' and is_lut) and 0.0 or (line.tax_ids and line.tax_ids[0].amount or 0)" /></td>
+                                        <td align="right"><t t-esc="round(((line.product_id.type != 'service' and is_lut) and 0.0 or (line.price_subtotal * (line.tax_ids and line.tax_ids[0].amount or 0) / 100)) * inv_to_comp_rate, 2)" /></td>
                                     </tr>
                                     <t t-set="sr" t-value="sr + 1" />
                                 </t>
                             </t>
-                            <tr style="font-weight:bold; background:#f2f2f2;">
-                                <td colspan="5" align="right">TOTAL</td>
-                                <td align="right"><t t-esc="inv_currency.format(sum(o.invoice_line_ids.mapped('price_subtotal')))" /></td>
+                            <tr style="font-weight:bold; border-top:2px solid #000;">
+                                <td colspan="6" align="right">TOTAL</td>
+                                <td align="right"><t t-esc="o.currency_id.format(round(goods_total, 2))" /></td>
+                                <td align="right"><t t-esc="o.company_id.currency_id.format(round(goods_total * inv_to_comp_rate, 2))" /></td>
                                 <td></td>
-                                <td align="right"><t t-esc="comp_currency.format(total_igst)" /></td>
+                                <td align="right"><t t-esc="o.company_id.currency_id.format(round(gst_amount * inv_to_comp_rate, 2))" /></td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <table style="width:100%; margin-top:5px;">
+                    <table style="width:100%;">
                         <tr>
-                            <td width="60%">
-                                <t t-if="is_lut">
-                                    <strong>LUT Declaration:</strong> Supply meant for export under LUT without payment of integrated tax.
-                                </t>
+                            <td width="50%" style="border:1px solid #000; padding:10px;">
+                                <strong>Amount Chargeable (In Words)</strong><br />
+                                <em><t t-esc="inv_currency.name" /> <t t-esc="inv_currency.amount_to_text(o.amount_total)" /> Only</em>
+                                <br/><br/>
+                                <t t-if="is_lut"><strong>LUT Declaration:</strong> Supply meant for export under LUT without payment of integrated tax.</t>
                             </td>
-                            <td width="40%" style="padding:0;">
-                                <table style="width:100%; border:none;">
-                                    <tr><td>IGST (INR)</td><td align="right"><t t-esc="comp_currency.format(total_igst)"/></td></tr>
-                                    <tr><td>Freight (<t t-esc="inv_currency.name"/>)</td><td align="right"><t t-esc="inv_currency.format(freight_total)"/></td></tr>
-                                    <tr style="font-weight:bold; background:#eee;"><td>GRAND TOTAL</td><td align="right"><t t-esc="o.currency_id.format(o.amount_total)"/></td></tr>
+                            <td width="50%" style="padding:0; border:1px solid #000;">
+                                <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                                    <tr><td style="border:1px solid #000; padding:4px;">IGST (INR)</td><td align="right" style="border:1px solid #000;"><t t-esc="o.company_id.currency_id.format(total_igst)"/></td></tr>
+                                    <tr>
+                                        <td style="border:1px solid #000; padding:4px;">Freight (<t t-esc="inv_currency.name"/>)</td>
+                                        <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(freight_total)"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border:1px solid #000; padding:4px;">Insurance (<t t-esc="inv_currency.name"/>)</td>
+                                        <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(insurance_total)"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border:1px solid #000; padding:4px;">Discount (<t t-esc="inv_currency.name"/>)</td>
+                                        <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(discount_amount)"/></td>
+                                    </tr>
+                                    <tr style="font-weight:bold; background:#f2f2f2;"><td style="border:1px solid #000; padding:4px;">GRAND TOTAL</td><td align="right" style="border:1px solid #000;"><t t-esc="o.company_id.currency_id.format(net_amount_incl_gst)"/></td></tr>
                                 </table>
                             </td>
                         </tr>
                     </table>
 
-                    <table style="width:100%; margin-top:10px; border: 1px solid black;">
-                        <tr style="background:#f2f2f2; font-weight:bold;">
-                            <td style="border:1px solid black;">HSN CODE</td>
-                            <td style="border:1px solid black;">Taxable Value</td>
-                            <td style="border:1px solid black;">IGST %</td>
-                            <td style="border:1px solid black;">Tax Amt</td>
-                        </tr>
-                        <t t-foreach="hsn_summary" t-as="l">
-                            <tr>
-                                <td style="border:1px solid black;"><t t-esc="l['hsn']" /></td>
-                                <td style="border:1px solid black;"><t t-esc="comp_currency.format(l['taxable'] * inv_to_comp_rate)" /></td>
-                                <td style="border:1px solid black;">
-                                    <t t-if="is_lut and l['hsn'] != '9965'">0.0</t>
-                                    <t t-else=""><t t-esc="l['rate']" /></t>
-                                </td>
-                                <td style="border:1px solid black;">
-                                    <t t-if="is_lut and l['hsn'] != '9965'">₹ 0.00</t>
-                                    <t t-else=""><t t-esc="comp_currency.format((l['taxable'] * l['rate'] / 100) * inv_to_comp_rate)" /></t>
-                                </td>
+                    <table style="width:100%; margin-top:5px; border:1px solid #000;">
+                        <thead>
+                            <tr style="background:#f2f2f2; font-weight:bold;">
+                                <td>HSN CODE</td><td>Taxable Value</td><td>IGST %</td><td>Tax Amt</td>
                             </tr>
-                        </t>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="hsn_summary" t-as="l">
+                                <tr>
+                                    <td><t t-esc="l['hsn']" /></td>
+                                    <td><t t-esc="o.company_id.currency_id.format(l['taxable'] * inv_to_comp_rate)" /></td>
+                                    <td><t t-if="is_lut and l['hsn'] != '9965'">0.0</t><t t-else=""><t t-esc="l['rate']" /></t></td>
+                                    <td><t t-if="is_lut and l['hsn'] != '9965'">₹ 0.00</t><t t-else=""><t t-esc="o.company_id.currency_id.format((l['taxable'] * l['rate'] / 100) * inv_to_comp_rate)" /></t></td>
+                                </tr>
+                            </t>
+                        </tbody>
                     </table>
 
-                    <table style="width:100%; margin-top:10px; border:none;">
+                    <table style="width:100%; border-top:none;">
                         <tr>
-                            <td style="border:none;"><strong>DECLARATION:</strong> We declare that this invoice shows the actual price.</td>
-                            <td style="border:none; text-align:center;">For <strong><t t-esc="o.company_id.name"/></strong><br/><br/>Authorised Signatory</td>
+                            <td width="65%" style="border:1px solid #000;"><strong>DECLARATION:</strong> We declare that this invoice shows the actual price of the goods described.</td>
+                            <td width="35%" style="border:1px solid #000;"><strong>For <t t-esc="o.company_id.name" /></strong><br/><br/>Authorised Signatory</td>
                         </tr>
                     </table>
                 </div>
