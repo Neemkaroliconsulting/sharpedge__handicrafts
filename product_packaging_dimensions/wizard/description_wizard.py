@@ -27,7 +27,6 @@ class DescriptionSelectWizard(models.TransientModel):
         [
             ('move_id', '=', context.get('active_id')),
             ('display_type', '=', False),
-            ('tax_line_id', '=', False),
             ('product_id', '!=', False)
         ]
     """
