@@ -75,8 +75,16 @@ class DescriptionSelectWizard(models.TransientModel):
     show_total_qty = fields.Boolean(default=True)
     show_dimensions = fields.Boolean(default=True)
     # show_net_amount = fields.Boolean()
-    show_net_cf = fields.Boolean()
-    show_net_cif = fields.Boolean()
+    # Radio buttons ke liye Selection field zaroori hai
+    show_net_cf = fields.Selection([
+        ('yes', 'Yes'),
+        ('no', 'No')
+    ], string="Show Net CF", default='no')
+    
+    show_net_cif = fields.Selection([
+        ('yes', 'Yes'),
+        ('no', 'No')
+    ], string="Show Net CIF", default='no')
 
     # ==================================================
     # ✅ FINAL CONTROL (MAIN LOGIC)
