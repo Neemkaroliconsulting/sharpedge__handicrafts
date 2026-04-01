@@ -33,9 +33,10 @@
 
                 <group string="Summary (Show on Print)" col="2">
                     <!-- <field name="show_net_amount"/> -->
-                <field name="show_net_cf" widget="radio" />
-                <field name="show_net_cif" widget="radio" />
-                </group>
+               
+        <field name="show_net_cf"/> <field name="show_net_cif"/>
+    </group>
+           
 
                 <footer>
                     <button name="action_print_report"
