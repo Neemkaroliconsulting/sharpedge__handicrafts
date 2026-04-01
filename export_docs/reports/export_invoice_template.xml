@@ -49,6 +49,8 @@
                 <t t-set="net_cf" t-value="net_amount_val + freight_val" />
                 <t t-set="net_cif" t-value="net_cf + insurance_val" />
 
+                <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity'))" />
+
                 <t t-set="word_label" t-value="''" />
                 <t t-set="word_val" t-value="o.amount_total" />
                 <t t-if="wiz.get('show_net_cf')">
@@ -85,10 +87,6 @@
                                 <strong>Buyer's Order No.:</strong> <t t-esc="' / '.join(buyer_orders)"/>
                             </td>
                         </tr>
-                        <tr>
-                            <td><strong>Consignee:</strong><br/><t t-esc="o.consignee_id.name"/><br/><t t-esc="o.consignee_id.street"/>, <t t-esc="o.consignee_id.city"/></td>
-                            <td><strong>Buyer (if other than consignee):</strong><br/><t t-esc="o.buyer_id.name"/></td>
-                        </tr>
                     </table>
 
                     <table class="no-top">
@@ -97,15 +95,8 @@
                             <td>Final Destination: <strong><t t-esc="o.country_destination_id.name"/></strong></td>
                         </tr>
                         <tr>
-                            <td>Pre-Carriage By: <strong><t t-esc="o.pre_carriage_by"/></strong></td>
-                            <td>Place of Receipt: <strong><t t-esc="o.place_of_receipt"/></strong></td>
-                        </tr>
-                        <tr>
                             <td>Port of Loading: <strong><t t-esc="o.port_loading"/></strong></td>
                             <td>Port of Discharge: <strong><t t-esc="o.port_discharge"/></strong></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">Terms: <t t-esc="o.terms_delivery"/> / <t t-esc="o.payment_terms_export"/></td>
                         </tr>
                     </table>
 
@@ -113,46 +104,38 @@
                         <thead>
                             <tr class="bg-light text-center">
                                 <th width="5%">Sr.</th>
-                                <th width="40%">Description of Goods</th>
+                                <th width="45%">Description of Goods</th>
                                 <th width="10%">HSN</th>
                                 <th width="10%">Quantity</th>
                                 <th width="15%">Rate (<t t-esc="inv_currency.name"/>)</th>
-                                <th width="20%">Amount (<t t-esc="inv_currency.name"/>)</th>
+                                <th width="15%">Amount (<t t-esc="inv_currency.name"/>)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <t t-set="sr" t-value="1"/>
-                            <t t-set="total_pcs" t-value="0"/>
                             <t t-foreach="product_lines" t-as="line">
                                 <tr>
                                     <td class="text-center"><t t-esc="sr"/></td>
                                     <td><t t-esc="line.name"/></td>
-                                    <td class="text-center"><t t-esc="line.product_id.l10n_in_hsn_code or '' "/></td>
-                                    <td class="text-right">
-                                        <t t-esc="line.quantity"/> Pcs 
-                                        <t t-set="total_pcs" t-value="total_pcs + line.quantity"/>
-                                    </td>
+                                    <td class="text-center"><t t-esc="line.product_id.l10n_in_hsn_code or ''"/></td>
+                                    <td class="text-right"><t t-esc="line.quantity"/> Pcs</td>
                                     <td class="text-right"><t t-esc="round(line.price_unit, 2)"/></td>
                                     <td class="text-right"><t t-esc="round(line.price_subtotal, 2)"/></td>
                                 </tr>
                                 <t t-set="sr" t-value="sr + 1"/>
                             </t>
                             <t t-foreach="range(3)" t-as="i"><tr style="height:20px;"><td></td><td></td><td></td><td></td><td></td><td></td></tr></t>
-                            <tr class="bg-light">
-                                <td colspan="3" class="text-right"><strong>TOTAL PCS:</strong></td>
-                                <td class="text-right"><strong><t t-esc="int(total_pcs)"/></strong></td>
-                                <td colspan="2"></td>
-                            </tr>
                         </tbody>
                     </table>
 
                     <table class="no-top">
                         <tr>
                             <td width="55%" style="padding:10px;">
+                                <strong>Total PCS (In Words):</strong><br/>
+                                <em><t t-esc="o.company_id.currency_id.amount_to_text(total_pcs).replace(o.company_id.currency_id.name, 'Pieces').replace('Cent', '')"/> Only</em>
+                                <br/><br/>
                                 <strong>Amount Chargeable (In Words):</strong><br/>
                                 <em><t t-esc="word_label"/> <t t-esc="inv_currency.name"/> <t t-esc="inv_currency.amount_to_text(word_val)"/> Only</em>
-                                <br/><br/>
-                                <strong>Declaration:</strong> We declare that this invoice shows the actual price of the goods described.
                             </td>
                             <td width="45%" style="padding:0;">
                                 <table style="width:100%; border:none;">
@@ -173,16 +156,12 @@
                                         <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_cf)"/></td>
                                     </tr>
                                     <tr>
-                                        <td style="border:none; border-bottom:1px solid #000; padding:4px;">ADD: INSURANCE (+)</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(insurance_val)"/></td>
+                                        <td style="border:none; padding:4px;">ADD: INSURANCE (+)</td>
+                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><t t-esc="inv_currency.format(insurance_val)"/></td>
                                     </tr>
-                                    <tr t-if="wiz.get('show_net_cif')" class="bg-light">
-                                        <td style="border:none; border-bottom:1px solid #000; padding:4px;">NET CIF</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_cif)"/></td>
-                                    </tr>
-                                    <tr style="background:#ddd; font-weight:bold;">
-                                        <td style="border:none; padding:4px;">GRAND TOTAL</td>
-                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><t t-esc="inv_currency.format(o.amount_total)"/></td>
+                                    <tr t-if="wiz.get('show_net_cif')" class="bg-light" style="border-top:1px solid #000;">
+                                        <td style="border:none; padding:4px;">NET CIF</td>
+                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_cif)"/></td>
                                     </tr>
                                 </table>
                             </td>
@@ -190,16 +169,20 @@
                     </table>
 
                     <table class="no-top">
-                        <tr class="text-center">
-                            <td>TOTAL NET WT (Kgs): <strong><t t-esc="round(o.net_weight or 0, 3)"/></strong></td>
-                            <td>GROSS WT (Kgs): <strong><t t-esc="round(o.gross_weight or 0, 3)"/></strong></td>
-                            <td>Total PKGS: <strong><t t-esc="o.total_packages or 0"/></strong></td>
-                        </tr>
-                    </table>
-
-                    <table class="no-top">
                         <tr>
-                            <td class="text-right" style="height:60px; vertical-align:bottom;">
+                            <td width="55%" style="padding:0;">
+                                <table style="width:100%; border:none;">
+                                    <tr class="text-center">
+                                        <td style="border:none; border-right:1px solid #000;">Net Wt: <t t-esc="round(o.net_weight or 0, 3)"/> Kgs</td>
+                                        <td style="border:none; border-right:1px solid #000;">Gross Wt: <t t-esc="round(o.gross_weight or 0, 3)"/> Kgs</td>
+                                        <td style="border:none;">Total PKGS: <t t-esc="int(total_pcs)"/></td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td width="45%" class="text-center" style="vertical-align:bottom; height:80px;">
+                                <div style="font-size:10px; text-align:left; margin-bottom:10px;">
+                                    <strong>DECLARATION:</strong> We declare that this invoice shows the actual price of the goods described.
+                                </div>
                                 For <strong><t t-esc="o.company_id.name"/></strong><br/><br/>
                                 Authorised Signatory
                             </td>
