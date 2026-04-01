@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+
     <record id="paperformat_export_a4" model="report.paperformat">
         <field name="name">Export Invoice A4 Clean</field>
         <field name="format">A4</field>
@@ -38,39 +39,37 @@
                 </t>
 
                 <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service')" />
-                <t t-set="insurance_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type == 'service' and 'insurance' in (l.product_id.name or '').lower())" />
-                <t t-set="freight_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type == 'service' and 'freight' in (l.product_id.name or '').lower())" />
-
                 <t t-set="goods_gross" t-value="sum(product_lines.mapped(lambda l: l.quantity * l.price_unit))" />
                 <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100))" />
-                <t t-set="product_net" t-value="goods_gross - discount_total" />
-                <t t-set="freight_val" t-value="sum(freight_lines.mapped('price_subtotal'))" />
-                <t t-set="insurance_val" t-value="sum(insurance_lines.mapped('price_subtotal'))" />
+                <t t-set="net_amount_val" t-value="goods_gross - discount_total" />
                 
-                <t t-set="net_cf" t-value="product_net + freight_val" />
+                <t t-set="freight_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and 'freight' in (l.product_id.name or '').lower()).mapped('price_subtotal'))" />
+                <t t-set="insurance_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and 'insurance' in (l.product_id.name or '').lower()).mapped('price_subtotal'))" />
+                
+                <t t-set="net_cf" t-value="net_amount_val + freight_val" />
                 <t t-set="net_cif" t-value="net_cf + insurance_val" />
 
-                <t t-set="val_for_words" t-value="o.amount_total" />
-                <t t-if="wiz.get('show_net_amount')"><t t-set="val_for_words" t-value="product_net"/></t>
-                <t t-elif="wiz.get('show_net_cf')"><t t-set="val_for_words" t-value="net_cf"/></t>
-                <t t-elif="wiz.get('show_net_cif')"><t t-set="val_for_words" t-value="net_cif"/></t>
+                <t t-set="word_label" t-value="''" />
+                <t t-set="word_val" t-value="o.amount_total" />
+                <t t-if="wiz.get('show_net_cf')"><t t-set="word_val" t-value="net_cf"/><t t-set="word_label" t-value="'(NET C&amp;F)'"/></t>
+                <t t-elif="wiz.get('show_net_cif')"><t t-set="word_val" t-value="net_cif"/><t t-set="word_label" t-value="'(NET CIF)'"/></t>
 
-                <div class="page" style="font-size:12px; font-family: 'Times New Roman', serif;">
+                <div class="page" style="font-size:11.5px; font-family: 'Times New Roman', serif;">
                     <style>
                         table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
-                        th, td { border: 1px solid #000; padding: 4px; vertical-align: top; }
+                        th, td { border: 1px solid #000; padding: 3px 5px; vertical-align: top; }
                         .text-right { text-align: right; } .text-center { text-align: center; }
                         .bg-light { background: #f2f2f2; font-weight: bold; }
+                        .no-top { border-top: none; }
                     </style>
 
-                    <h3 class="text-center">EXPORT INVOICE</h3>
+                    <h3 class="text-center" style="margin:0; padding:5px;">TAX INVOICE</h3>
 
                     <table>
                         <tr>
                             <td width="60%">
                                 <strong>Exporter: <t t-esc="o.company_id.name"/></strong><br/>
-                                <t t-esc="o.company_id.street"/><br/><t t-esc="o.company_id.city"/>
-                                <t t-if="o.company_id.country_id">, <t t-esc="o.company_id.country_id.name"/></t><br/>
+                                <t t-esc="o.company_id.street"/>, <t t-esc="o.company_id.city"/><br/>
                                 <strong>GSTIN:</strong> <t t-esc="o.company_id.vat"/>
                             </td>
                             <td width="40%">
@@ -79,9 +78,13 @@
                                 <strong>Buyer Order No:</strong> <t t-esc="' / '.join(buyer_orders)"/>
                             </td>
                         </tr>
+                        <tr>
+                            <td><strong>Consignee:</strong><br/><t t-esc="o.consignee_id.name"/><br/><t t-esc="o.consignee_id.street"/>, <t t-esc="o.consignee_id.city"/></td>
+                            <td><strong>Buyer (if other than consignee):</strong><br/><t t-esc="o.buyer_id.name"/></td>
+                        </tr>
                     </table>
 
-                    <table style="border-top:none;">
+                    <table class="no-top">
                         <tr>
                             <td>Country of Origin: <strong><t t-esc="o.country_origin_id.name"/></strong></td>
                             <td>Final Destination: <strong><t t-esc="o.country_destination_id.name"/></strong></td>
@@ -94,92 +97,93 @@
                             <td>Port of Loading: <strong><t t-esc="o.port_loading"/></strong></td>
                             <td>Port of Discharge: <strong><t t-esc="o.port_discharge"/></strong></td>
                         </tr>
-                        <tr>
-                            <td colspan="2">Terms: <t t-esc="o.terms_delivery"/> / <t t-esc="o.payment_terms_export"/></td>
-                        </tr>
                     </table>
 
-                    <table style="border-top:none;">
+                    <table class="no-top">
                         <thead>
                             <tr class="bg-light">
                                 <th width="5%">Sr</th>
-                                <th width="40%">Description</th>
+                                <th width="35%">Description of Goods</th>
                                 <th width="10%">HSN</th>
-                                <th width="10%">Qty</th>
-                                <th width="15%">Rate (<t t-esc="inv_currency.name"/>)</th>
-                                <th width="20%">Amount (<t t-esc="inv_currency.name"/>)</th>
+                                <th width="8%">Qty</th>
+                                <th width="12%">Rate (<t t-esc="inv_currency.name"/>)</th>
+                                <th width="15%">Amount (<t t-esc="inv_currency.name"/>)</th>
                             </tr>
                         </thead>
                         <tbody>
                             <t t-set="sr" t-value="1"/>
+                            <t t-set="total_pcs" t-value="0"/>
                             <t t-foreach="product_lines" t-as="line">
                                 <tr>
                                     <td class="text-center"><t t-esc="sr"/></td>
                                     <td><t t-esc="line.name"/></td>
-                                    <td class="text-center"><t t-esc="line.product_id.l10n_in_hsn_code"/></td>
-                                    <td class="text-right"><t t-esc="line.quantity"/></td>
-                                    <td class="text-right"><t t-esc="line.price_unit"/></td>
-                                    <td class="text-right"><t t-esc="line.price_subtotal"/></td>
+                                    <td class="text-center"><t t-esc="line.product_id.l10_in_hsn_code"/></td>
+                                    <td class="text-right"><t t-esc="line.quantity"/><t t-set="total_pcs" t-value="total_pcs + line.quantity"/></td>
+                                    <td class="text-right"><t t-esc="round(line.price_unit, 2)"/></td>
+                                    <td class="text-right"><t t-esc="round(line.price_subtotal, 2)"/></td>
                                 </tr>
                                 <t t-set="sr" t-value="sr + 1"/>
                             </t>
-                            <t t-foreach="range(5)" t-as="i"><tr style="height:20px;"><td></td><td></td><td></td><td></td><td></td><td></td></tr></t>
+                            <tr class="bg-light">
+                                <td colspan="3" class="text-right">TOTAL PCS</td>
+                                <td class="text-right"><t t-esc="total_pcs"/></td>
+                                <td colspan="2"></td>
+                            </tr>
                         </tbody>
                     </table>
 
-                    <table style="border-top:none;">
+                    <table class="no-top">
                         <tr>
-                            <td width="55%" style="padding:10px;">
-                                <strong>Amount in Words:</strong><br/>
-                                <em><t t-esc="inv_currency.name"/> <t t-esc="inv_currency.amount_to_text(val_for_words)"/> Only</em>
+                            <td width="55%">
+                                <strong>Amount in Words <t t-esc="word_label"/>:</strong><br/>
+                                <em><t t-esc="inv_currency.name"/> <t t-esc="inv_currency.amount_to_text(word_val)"/> Only</em>
+                                <br/><br/>
+                                <strong>LUT Declaration:</strong> Export under LUT without payment of integrated tax.
                             </td>
                             <td width="45%" style="padding:0;">
                                 <table style="width:100%; border:none;">
                                     <tr>
-                                        <td style="border:none; border-bottom:1px solid black; padding:4px;">GROSS VALUE</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid black; border-left:1px solid black;"><t t-esc="inv_currency.format(goods_gross)"/></td>
+                                        <td style="border:none; border-bottom:1px solid #000; padding:3px;">LESS: DISCOUNT</td>
+                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;">- <t t-esc="inv_currency.format(discount_total)"/></td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td style="border:none; border-bottom:1px solid #000; padding:3px;">NET AMOUNT</td>
+                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_amount_val)"/></td>
                                     </tr>
                                     <tr>
-                                        <td style="border:none; border-bottom:1px solid black; padding:4px;">LESS: DISCOUNT</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid black; border-left:1px solid black;">- <t t-esc="inv_currency.format(discount_total)"/></td>
-                                    </tr>
-                                    <tr t-if="wiz.get('show_net_amount')" class="bg-light">
-                                        <td style="border:none; border-bottom:1px solid black; padding:4px;">NET AMOUNT</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid black; border-left:1px solid black;"><t t-esc="inv_currency.format(product_net)"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="border:none; border-bottom:1px solid black; padding:4px;">ADD: FREIGHT</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid black; border-left:1px solid black;"><t t-esc="inv_currency.format(freight_val)"/></td>
+                                        <td style="border:none; border-bottom:1px solid #000; padding:3px;">ADD: FREIGHT</td>
+                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(freight_val)"/></td>
                                     </tr>
                                     <tr t-if="wiz.get('show_net_cf')" class="bg-light">
-                                        <td style="border:none; border-bottom:1px solid black; padding:4px;">NET C&amp;F</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid black; border-left:1px solid black;"><t t-esc="inv_currency.format(net_cf)"/></td>
+                                        <td style="border:none; border-bottom:1px solid #000; padding:3px;">NET C&amp;F</td>
+                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_cf)"/></td>
                                     </tr>
                                     <tr>
-                                        <td style="border:none; border-bottom:1px solid black; padding:4px;">ADD: INSURANCE</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid black; border-left:1px solid black;"><t t-esc="inv_currency.format(insurance_val)"/></td>
+                                        <td style="border:none; border-bottom:1px solid #000; padding:3px;">ADD: INSURANCE</td>
+                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(insurance_val)"/></td>
                                     </tr>
                                     <tr t-if="wiz.get('show_net_cif')" class="bg-light">
-                                        <td style="border:none; border-bottom:1px solid black; padding:4px;">NET CIF</td>
-                                        <td class="text-right" style="border:none; border-bottom:1px solid black; border-left:1px solid black;"><t t-esc="inv_currency.format(net_cif)"/></td>
+                                        <td style="border:none; border-bottom:1px solid #000; padding:3px;">NET CIF</td>
+                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_cif)"/></td>
                                     </tr>
-                                    <tr style="background:#ddd; font-weight:bold;">
-                                        <td style="border:none; padding:4px;">GRAND TOTAL</td>
-                                        <td class="text-right" style="border:none; border-left:1px solid black;"><t t-esc="inv_currency.format(o.amount_total)"/></td>
+                                    <tr style="font-weight:bold; background:#ddd;">
+                                        <td style="border:none; padding:3px;">GRAND TOTAL</td>
+                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><t t-esc="inv_currency.format(o.amount_total)"/></td>
                                     </tr>
                                 </table>
                             </td>
                         </tr>
                     </table>
 
-                    <table>
+                    <table class="no-top">
                         <tr class="text-center">
-                            <td width="33%">Net Wt: <t t-esc="round(o.net_weight or 0, 3)"/> Kgs</td>
-                            <td width="33%">Gross Wt: <t t-esc="round(o.gross_weight or 0, 3)"/> Kgs</td>
-                            <td width="34%">Packages: <t t-esc="o.total_packages or 0"/></td>
+                            <td>Net Wt: <t t-esc="round(o.net_weight or 0, 3)"/> Kgs</td>
+                            <td>Gross Wt: <t t-esc="round(o.gross_weight or 0, 3)"/> Kgs</td>
+                            <td>Total Packages: <t t-esc="o.total_packages or 0"/></td>
                         </tr>
                     </table>
-                    <table style="border-top:none;">
+
+                    <table class="no-top">
                         <tr>
                             <td width="65%"><strong>DECLARATION:</strong> We declare that this invoice shows the actual price of the goods.</td>
                             <td width="35%" class="text-center">For <strong><t t-esc="o.company_id.name"/></strong><br/><br/>Authorised Signatory</td>
