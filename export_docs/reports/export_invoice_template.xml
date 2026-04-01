@@ -64,43 +64,62 @@
 
                 <div class="page" style="font-size:11px; font-family: 'Times New Roman', serif;">
                     <style>
-                        table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
-                        th, td { border: 1px solid #000; padding: 4px; vertical-align: top; }
-                        .text-right { text-align: right; } .text-center { text-align: center; }
+                        .main-table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
+                        .main-table th, .main-table td { border: 1px solid #000; padding: 4px; vertical-align: top; }
+                        .text-right { text-align: right; } 
+                        .text-center { text-align: center; }
                         .bg-light { background: #f2f2f2; font-weight: bold; }
-                        .no-top { border-top: none; }
+                        .no-border { border: none !important; }
                     </style>
 
-                    <h3 class="text-center" style="margin-bottom:10px;">INVOICE</h3>
+                    <h3 class="text-center" style="margin-bottom:5px;">INVOICE</h3>
 
-                    <table>
+                    <table class="main-table">
                         <tr>
-                            <td width="50%">
+                            <td width="50%" rowspan="2">
                                 <strong>Exporter</strong><br/>
-                                <strong><t t-esc="o.company_id.name"/></strong><br/>
+                                <strong style="font-size:13px;"><t t-esc="o.company_id.name"/></strong><br/>
                                 <t t-esc="o.company_id.street"/>, <t t-esc="o.company_id.city"/><br/>
                                 <strong>GSTIN:</strong> <t t-esc="o.company_id.vat"/>
                             </td>
-                            <td width="50%">
-                                <strong>Invoice No.:</strong> <t t-esc="o.name"/><br/>
-                                <strong>Invoice Dt.:</strong> <t t-esc="o.invoice_date"/><br/>
-                                <strong>Buyer's Order No.:</strong> <t t-esc="' / '.join(buyer_orders)"/>
+                            <td width="25%">
+                                <strong>Invoice No.</strong><br/>
+                                <t t-esc="o.name"/>
+                            </td>
+                            <td width="25%">
+                                <strong>Dated</strong><br/>
+                                <t t-esc="o.invoice_date"/>
                             </td>
                         </tr>
-                    </table>
-
-                    <table class="no-top">
+                        <tr>
+                            <td width="50%" colspan="2">
+                                <strong>Buyer's Order No.</strong><br/>
+                                <t t-esc="' / '.join(buyer_orders)"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="50%">
+                                <strong>Consignee</strong><br/>
+                                <strong><t t-esc="o.partner_id.name"/></strong><br/>
+                                <t t-esc="o.partner_id.street"/><br/>
+                                <t t-esc="o.partner_id.city"/>, <t t-esc="o.partner_id.country_id.name"/>
+                            </td>
+                            <td width="50%" colspan="2">
+                                <strong>Buyer (if other than consignee)</strong><br/>
+                                <span>Same as Consignee</span>
+                            </td>
+                        </tr>
                         <tr>
                             <td>Country of Origin: <strong><t t-esc="o.country_origin_id.name"/></strong></td>
-                            <td>Final Destination: <strong><t t-esc="o.country_destination_id.name"/></strong></td>
+                            <td colspan="2">Final Destination: <strong><t t-esc="o.country_destination_id.name"/></strong></td>
                         </tr>
                         <tr>
                             <td>Port of Loading: <strong><t t-esc="o.port_loading"/></strong></td>
-                            <td>Port of Discharge: <strong><t t-esc="o.port_discharge"/></strong></td>
+                            <td colspan="2">Port of Discharge: <strong><t t-esc="o.port_discharge"/></strong></td>
                         </tr>
                     </table>
 
-                    <table class="no-top">
+                    <table class="main-table" style="border-top: none;">
                         <thead>
                             <tr class="bg-light text-center">
                                 <th width="5%">Sr.</th>
@@ -124,19 +143,39 @@
                                 </tr>
                                 <t t-set="sr" t-value="sr + 1"/>
                             </t>
-                            <t t-foreach="range(3)" t-as="i"><tr style="height:20px;"><td></td><td></td><td></td><td></td><td></td><td></td></tr></t>
+                            <t t-foreach="range(5)" t-as="i">
+                                <tr style="height:20px;"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            </t>
+                            <tr class="bg-light">
+                                <td colspan="3" class="text-right">TOTAL</td>
+                                <td class="text-right"><t t-esc="total_pcs"/> Pcs</td>
+                                <td></td>
+                                <td class="text-right"><t t-esc="inv_currency.format(goods_gross)"/></td>
+                            </tr>
                         </tbody>
                     </table>
 
-                    <table class="no-top">
+                    <table class="main-table" style="border-top: none;">
                         <tr>
                             <td width="55%" style="padding:10px;">
-                                <strong>Total PCS (In Words):</strong><br/>
-                                <em><t t-esc="o.company_id.currency_id.amount_to_text(total_pcs).replace(o.company_id.currency_id.name, 'Pieces').replace('Cent', '')"/> Only</em>
-                                <br/><br/>
-                                <strong>Amount Chargeable (In Words):</strong><br/>
-                                <em><t t-esc="word_label"/> <t t-esc="inv_currency.name"/> <t t-esc="inv_currency.amount_to_text(word_val)"/> Only</em>
-                            </td>
+    <strong>Total PCS:</strong><br/>
+    <em>
+        <t t-esc="int(total_pcs)"/> Pieces Only
+    </em>
+    <br/><br/>
+
+    <strong>Amount Chargeable (In Words):</strong><br/>
+    <em>
+        <t t-if="word_label">
+            <t t-esc="word_label"/> 
+        </t>
+        
+        <t t-esc="inv_currency.name"/> 
+        
+        <t t-esc="inv_currency.amount_to_text(word_val)"/> 
+        Only
+    </em>
+</td>
                             <td width="45%" style="padding:0;">
                                 <table style="width:100%; border:none;">
                                     <tr>
@@ -156,19 +195,19 @@
                                         <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_cf)"/></td>
                                     </tr>
                                     <tr>
-                                        <td style="border:none; padding:4px;">ADD: INSURANCE (+)</td>
-                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><t t-esc="inv_currency.format(insurance_val)"/></td>
+                                        <td style="border:none; border-bottom:1px solid #000; padding:4px;">ADD: INSURANCE (+)</td>
+                                        <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(insurance_val)"/></td>
                                     </tr>
-                                    <tr t-if="wiz.get('show_net_cif')" class="bg-light" style="border-top:1px solid #000;">
-                                        <td style="border:none; padding:4px;">NET CIF</td>
-                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_cif)"/></td>
+                                    <tr t-if="wiz.get('show_net_cif')" class="bg-light">
+                                        <td style="border:none; padding:4px;"><strong>NET CIF</strong></td>
+                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(net_cif)"/></strong></td>
                                     </tr>
                                 </table>
                             </td>
                         </tr>
                     </table>
 
-                    <table class="no-top">
+                    <table class="main-table" style="border-top: none;">
                         <tr>
                             <td width="55%" style="padding:0;">
                                 <table style="width:100%; border:none;">
@@ -178,12 +217,12 @@
                                         <td style="border:none;">Total PKGS: <t t-esc="int(total_pcs)"/></td>
                                     </tr>
                                 </table>
-                            </td>
-                            <td width="45%" class="text-center" style="vertical-align:bottom; height:80px;">
-                                <div style="font-size:10px; text-align:left; margin-bottom:10px;">
+                                <div style="padding:5px; border-top:1px solid #000; font-size:10px;">
                                     <strong>DECLARATION:</strong> We declare that this invoice shows the actual price of the goods described.
                                 </div>
-                                For <strong><t t-esc="o.company_id.name"/></strong><br/><br/>
+                            </td>
+                            <td width="45%" class="text-center" style="vertical-align:bottom; height:80px;">
+                                For <strong><t t-esc="o.company_id.name"/></strong><br/><br/><br/>
                                 Authorised Signatory
                             </td>
                         </tr>
