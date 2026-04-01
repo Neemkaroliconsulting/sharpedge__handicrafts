@@ -178,9 +178,9 @@ class DescriptionSelectWizard(models.TransientModel):
             "show_total_qty": self.show_total_qty,
             "show_dimensions": self.show_dimensions,
             # "show_net_amount": self.show_net_amount,
-            "show_net_cf": self.show_net_cf,
-            "show_net_cif": self.show_net_cif,
-            
+            # "show_net_cf": self.show_net_cf,
+            # "show_net_cif": self.show_net_cif,
+            "amount_summary": self.amount_summary,
         }
 
         # ================= PDF =================
