@@ -39,7 +39,7 @@
                 </group> -->
 
                 <group string="Summary (Show on Print)" col="2">
-                   <field name="amount_summary" widget="radio"/>
+    <field name="amount_summary" widget="radio" options="{'horizontal': true}"/>
 </group>
            
 
