@@ -127,7 +127,7 @@
                                 <tr>
                                     <td class="text-center"><t t-esc="sr"/></td>
                                     <td><t t-esc="line.name"/></td>
-                                    <td class="text-center"><t t-esc="line.product_id.l10_in_hsn_code"/></td>
+                                    <td class="text-center"><t t-esc="line.product_id.l10_in_hsn_code or '' "/></td>
                                     <td class="text-right">
                                         <t t-esc="line.quantity"/> Pcs 
                                         <t t-set="total_pcs" t-value="total_pcs + line.quantity"/>
