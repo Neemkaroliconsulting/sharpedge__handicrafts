@@ -39,8 +39,7 @@
                 </group> -->
 
                 <group string="Summary (Show on Print)" col="2">
-    <field name="show_net_cf" widget="radio" options="{'horizontal': true}"/>
-    <field name="show_net_cif" widget="radio" options="{'horizontal': true}"/>
+                   <field name="amount_summary" widget="radio"/>
 </group>
            
 
