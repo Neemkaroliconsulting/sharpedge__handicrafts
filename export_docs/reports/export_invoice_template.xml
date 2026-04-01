@@ -50,7 +50,7 @@
                 <t t-set="net_cif" t-value="net_cf + insurance_val" />
                 <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity'))" />
 
-                <t t-set="total_pkgs_so" t-value="sum(o.invoice_line_ids.mapped('sale_line_ids.order_id.total_pkgs'))" />
+                <t t-set="total_pkgs_so" t-value="sum(o.invoice_line_ids.mapped('sale_line_ids.order_id.total_packages'))" />
 
                 <t t-set="word_label" t-value="''" />
                 <t t-set="word_val" t-value="o.amount_total" />
@@ -95,30 +95,14 @@
                                 <t t-esc="o.partner_id.street"/><br/>
                                 <t t-esc="o.partner_id.city"/>, <t t-esc="o.partner_id.country_id.name"/>
                             </td>
-                            <td width="50%" colspan="2">
-                                <strong>Buyer (if other than consignee)</strong><br/>
-                                <span>Same as Consignee</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Country of Origin: <strong><t t-esc="o.country_origin_id.name"/></strong></td>
-                            <td colspan="2">Final Destination: <strong><t t-esc="o.country_destination_id.name"/></strong></td>
-                        </tr>
-                        <tr>
-                            <td>Port of Loading: <strong><t t-esc="o.port_loading"/></strong></td>
-                            <td colspan="2">Port of Discharge: <strong><t t-esc="o.port_discharge"/></strong></td>
+                            <td width="50%" colspan="2"><strong>Buyer (if other than consignee)</strong><br/><span>Same as Consignee</span></td>
                         </tr>
                     </table>
 
                     <table class="main-table" style="border-top: none;">
                         <thead>
                             <tr class="bg-light text-center">
-                                <th width="5%">Sr.</th>
-                                <th width="45%">Description of Goods</th>
-                                <th width="10%">HSN</th>
-                                <th width="10%">Quantity</th>
-                                <th width="15%">Rate (<t t-esc="inv_currency.name"/>)</th>
-                                <th width="15%">Amount (<t t-esc="inv_currency.name"/>)</th>
+                                <th width="5%">Sr.</th><th width="45%">Description of Goods</th><th width="10%">HSN</th><th width="10%">Quantity</th><th width="15%">Rate</th><th width="15%">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -134,11 +118,10 @@
                                 </tr>
                                 <t t-set="sr" t-value="sr + 1"/>
                             </t>
-                            <tr style="height:20px;"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
                             <tr class="bg-light">
                                 <td colspan="3" class="text-right">TOTAL</td>
                                 <td class="text-right"><t t-esc="total_pcs"/> Pcs</td>
-                                <td></td>
+                                <td/>
                                 <td class="text-right"><t t-esc="inv_currency.format(goods_gross)"/></td>
                             </tr>
                         </tbody>
@@ -162,7 +145,6 @@
                                         <td style="border:none; border-bottom:1px solid #000; padding:4px;">NET AMOUNT</td>
                                         <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_amount_val)"/></td>
                                     </tr>
-                                    
                                     <t t-if="wiz.get('amount_summary') in ['cf', 'cif']">
                                         <tr>
                                             <td style="border:none; border-bottom:1px solid #000; padding:4px;">ADD: FREIGHT (+)</td>
@@ -170,20 +152,14 @@
                                         </tr>
                                     </t>
                                     <t t-if="wiz.get('amount_summary') == 'cf'">
-                                        <tr class="bg-light">
-                                            <td style="border:none; padding:4px;"><strong>NET C&amp;F</strong></td>
-                                            <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(net_cf)"/></strong></td>
-                                        </tr>
+                                        <tr class="bg-light"><td><strong>NET C&amp;F</strong></td><td class="text-right"><strong><t t-esc="inv_currency.format(net_cf)"/></strong></td></tr>
                                     </t>
                                     <t t-if="wiz.get('amount_summary') == 'cif'">
                                         <tr>
                                             <td style="border:none; border-bottom:1px solid #000; padding:4px;">ADD: INSURANCE (+)</td>
                                             <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(insurance_val)"/></td>
                                         </tr>
-                                        <tr class="bg-light">
-                                            <td style="border:none; padding:4px;"><strong>NET CIF</strong></td>
-                                            <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(net_cif)"/></strong></td>
-                                        </tr>
+                                        <tr class="bg-light"><td><strong>NET CIF</strong></td><td class="text-right"><strong><t t-esc="inv_currency.format(net_cif)"/></strong></td></tr>
                                     </t>
                                 </table>
                             </td>
@@ -205,8 +181,7 @@
                                 </div>
                             </td>
                             <td width="45%" class="text-center" style="vertical-align:bottom; height:80px;">
-                                For <strong><t t-esc="o.company_id.name"/></strong><br/><br/><br/>
-                                Authorised Signatory
+                                For <strong><t t-esc="o.company_id.name"/></strong><br/><br/>Authorised Signatory
                             </td>
                         </tr>
                     </table>
