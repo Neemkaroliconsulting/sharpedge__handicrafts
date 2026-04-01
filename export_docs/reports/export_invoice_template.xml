@@ -133,6 +133,8 @@
                                 <th width="15%"> Amount (<t t-esc="inv_currency.name" />)</th>
                             </tr>
                         </thead>
+                        <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: not l.display_type)"/>
+
                         <tbody>
                             <t t-set="sr" t-value="1" />
                             <t t-foreach="product_lines" t-as="line">
