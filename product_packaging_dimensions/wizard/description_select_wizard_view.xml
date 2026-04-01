@@ -31,12 +31,17 @@
 
                 </group>
 
-                <group string="Summary (Show on Print)" col="2">
-                    <!-- <field name="show_net_amount"/> -->
+                <!-- <group string="Summary (Show on Print)" col="2">
+                     <field name="show_net_amount"/> 
                
                     <field name="show_net_cf" widget="radio"/> 
                     <field name="show_net_cif" widget="radio"/>
-                </group>
+                </group> -->
+
+                <group string="Summary (Show on Print)" col="2">
+    <field name="show_net_cf" widget="radio" options="{'horizontal': true}"/>
+    <field name="show_net_cif" widget="radio" options="{'horizontal': true}"/>
+</group>
            
 
                 <footer>
