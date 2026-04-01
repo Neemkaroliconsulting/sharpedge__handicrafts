@@ -75,8 +75,8 @@ class DescriptionSelectWizard(models.TransientModel):
     show_total_qty = fields.Boolean(default=True)
     show_dimensions = fields.Boolean(default=True)
     # show_net_amount = fields.Boolean()
-    show_net_cf = fields.Radio()
-    show_net_cif = fields.Radio()
+    show_net_cf = fields.Boolean()
+    show_net_cif = fields.Boolean()
 
     # ==================================================
     # ✅ FINAL CONTROL (MAIN LOGIC)
