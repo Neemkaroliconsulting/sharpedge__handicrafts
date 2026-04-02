@@ -391,7 +391,7 @@
                         Gross Wt: <t t-esc="round(o.gross_weight or 0, 3)"/> Kgs
                     </td>
                     <td style="border:none;">
-                        Total PKGS: <t t-esc="int(o.total_pkgs or 0)"/>
+                        Total PKGS: <t t-esc="int(total_packages or 0)"/>
                     </td>
                 </tr>
             </table>
