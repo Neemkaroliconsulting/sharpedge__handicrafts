@@ -26,6 +26,7 @@
     <template id="export_invoice_template">
         <t t-call="web.basic_layout">
             <t t-foreach="docs" t-as="o">
+                <t t-set="wiz" t-value="o.env.context.get('wizard_data', {})"/>
                 
                 <t t-set="inv_currency" t-value="o.currency_id" />
                 
