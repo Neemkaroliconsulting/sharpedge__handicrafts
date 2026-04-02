@@ -223,7 +223,6 @@
 
     <t t-set="sr" t-value="1"/>
 
-    <!-- 🔴 OUTER LOOP -->
     <t t-foreach="grouped_lines.items()" t-as="grp">
 
         <!-- Buyer Order Header -->
@@ -259,7 +258,7 @@
                     </t>
 
                     <!-- Fallback -->
-                    <t t-else="">
+                    <t t-else>
                         <t t-esc="line.product_id.default_code or ''"/>
                     </t>
 
@@ -282,7 +281,7 @@
                     </t>
 
                     <!-- Default fallback -->
-                    <t t-else="">
+                    <t t-else>
                         <t t-esc="line.name"/>
                     </t>
                 </td>
