@@ -28,18 +28,18 @@
             <t t-foreach="docs" t-as="o">
                 
                 <t t-set="inv_currency" t-value="o.currency_id" />
-                
                 <t t-set="wiz_summary" t-value="o.env.context.get('amount_summary') or o._context.get('amount_summary') or o.env.context.get('wizard_data', {}).get('amount_summary')" />
 
                 <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service' and 'freight' not in (l.name or '').lower() and 'insurance' not in (l.name or '').lower())" />
                 
-                <t t-set="net_amount_val" t-value="sum(product_lines.mapped('price_subtotal'))" />
-                <t t-set="freight_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'freight' in (l.name or '').lower()).mapped('price_subtotal'))" />
-                <t t-set="insurance_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'insurance' in (l.name or '').lower()).mapped('price_subtotal'))" />
-                <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100))" />
-                <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity'))" />
+                <t t-set="goods_gross" t-value="sum(product_lines.mapped('price_subtotal')) or 0.0" />
+                <t t-set="freight_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'freight' in (l.name or '').lower()).mapped('price_subtotal')) or 0.0" />
+                <t t-set="insurance_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'insurance' in (l.name or '').lower()).mapped('price_subtotal')) or 0.0" />
+                <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100)) or 0.0" />
+                <t t-set="net_amount_val" t-value="goods_gross - discount_total" />
+                <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity')) or 0" />
 
-                <t t-set="display_total" t-value="o.amount_total" />
+                <t t-set="display_total" t-value="o.amount_total or 0.0" />
                 <t t-set="display_label" t-value="'GRAND TOTAL'" />
 
                 <t t-if="wiz_summary == 'cf'">
@@ -55,8 +55,7 @@
                     <style>
                         .main-table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
                         .main-table th, .main-table td { border: 1px solid #000; padding: 4px; vertical-align: top; }
-                        .text-right { text-align: right; } 
-                        .text-center { text-align: center; }
+                        .text-right { text-align: right; } .text-center { text-align: center; }
                         .bg-light { background: #f2f2f2; font-weight: bold; }
                     </style>
 
