@@ -240,51 +240,59 @@
                     <t t-esc="sr"/>
                 </td>
 
-                <td class="text-center">
-
-                    <!-- Export Mode -->
-                    <t t-if="desc_mode == 'export'">
-                        <t t-esc="line.product_id.default_code or ''"/>
-                    </t>
-
-                    <!-- Buyer Mode -->
-                    <t t-elif="desc_mode == 'buyer'">
-                        <t t-esc="line.product_id.buyer_code or line.product_id.default_code or ''"/>
-                    </t>
-
-                    <!-- Foreign Mode -->
-                    <t t-elif="desc_mode == 'foreign'">
-                        <t t-esc="line.product_id.foreign_code or line.product_id.default_code or ''"/>
-                    </t>
-
-                    <!-- Fallback -->
-                    <t t-else>
-                        <t t-esc="line.product_id.default_code or ''"/>
-                    </t>
-
-                </td>
-
                 <td>
-                    <!-- Exporter Description -->
-                    <t t-if="desc_mode == 'export'">
-                        <t t-esc="line.name"/>
-                    </t>
+                                            <t t-set="tmpl"
+                                                t-value="line.product_id.product_tmpl_id" />
+                                            <t t-set="partner" t-value="o.partner_id" />
 
-                    <!-- Buyer Description -->
-                    <t t-elif="desc_mode == 'buyer'">
-                        <t t-esc="line.product_id.description_sale or line.name"/>
-                    </t>
+                                            <t t-set="mapping"
+                                                t-value="tmpl.customer_sku_ids.filtered(
+                                                lambda m: m.customer_id == partner
+                                            )" />
 
-                    <!-- Foreign Language -->
-                    <t t-elif="desc_mode == 'foreign'">
-                        <t t-esc="line.product_id.name"/>
-                    </t>
+                                            <t
+                                                t-if="wiz.get('description_mode') == 'buyer' and mapping">
+                                                <t t-esc="mapping[0].buyer_sku" />
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="line.product_id.default_code or ''" />
+                                            </t>
+                                        </td>
 
-                    <!-- Default fallback -->
-                    <t t-else>
-                        <t t-esc="line.name"/>
-                    </t>
-                </td>
+
+                                        <td>
+                                            <t t-set="tmpl"
+                                                t-value="line.product_id.product_tmpl_id" />
+                                            <t t-set="partner" t-value="o.partner_id" />
+
+                                            <t t-set="mapping"
+                                                t-value="tmpl.customer_sku_ids.filtered(
+                                                    lambda m: m.customer_id == partner
+                                                )" />
+
+                                            <!-- BUYER / CUSTOMER DESCRIPTION -->
+                                            <t
+                                                t-if="wiz.get('description_mode') == 'buyer' and mapping">
+                                                <t t-esc="mapping[0].customer_description" />
+                                            </t>
+
+                                            <!-- EXPORT DESCRIPTION -->
+                                            <t
+                                                t-elif="wiz.get('description_mode') == 'export' and tmpl.export_description">
+                                                <t t-esc="tmpl.export_description" />
+                                            </t>
+
+                                            <!-- FOREIGN DESCRIPTION -->
+                                            <t
+                                                t-elif="wiz.get('description_mode') == 'foreign' and tmpl.foreign_description">
+                                                <t t-esc="tmpl.foreign_description" />
+                                            </t>
+
+                                            <!-- FALLBACK -->
+                                            <t t-else="">
+                                                <t t-esc="line.name" />
+                                            </t>
+                                        </td>
 
                 <td class="text-center">
                     <t t-esc="line.product_id.l10n_in_hsn_code or ''"/>
