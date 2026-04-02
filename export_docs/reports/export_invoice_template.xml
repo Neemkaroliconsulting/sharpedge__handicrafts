@@ -283,6 +283,8 @@
                                 <td></td>
                                 <td class="text-right"><t t-esc="inv_currency.format(goods_gross)"/></td>
                             </tr> -->
+
+                        </t> 
                         </tbody>
                     </table>
 
