@@ -149,7 +149,20 @@
                                 <strong>Total PCS:</strong><br/>
                                 <em><t t-esc="int(total_pcs)"/> Pieces Only</em><br/><br/>
                                 <strong>Amount Chargeable (In Words):</strong><br/>
-                                <em><t t-esc="inv_currency.name"/> <t t-esc="o.currency_id.amount_to_text(display_total)"/> Only</em>
+<em>
+
+    <!-- Prefix based on CF / CIF -->
+    <t t-if="wiz_summary == 'show_net_cf'">
+        NET C&amp;F 
+    </t>
+    <t t-elif="wiz_summary == 'show_net_cif'">
+        NET CI&amp;F 
+    </t>
+
+    <t t-esc="inv_currency.name"/>
+    <t t-esc="o.currency_id.amount_to_text(display_total)"/> Only
+
+</em>
                             </td>
                             <td width="45%" style="padding:0;">
                                 <table style="width:100%; border:none;">
