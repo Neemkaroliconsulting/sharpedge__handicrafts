@@ -9,6 +9,7 @@
         <field name="margin_bottom">15</field>
         <field name="margin_left">15</field>
         <field name="margin_right">15</field>
+        <field name="header_line" eval="False"/>
     </record>
 
     <record id="action_export_invoice_report" model="ir.actions.report">
@@ -22,11 +23,10 @@
         <field name="paperformat_id" ref="export_docs.paperformat_export_a4" />
     </record>
 
-    <template id="export_invoice_template" t-name="export_docs.export_invoice_template">
+    <template id="export_invoice_template">
         <t t-call="web.basic_layout">
             <t t-foreach="docs" t-as="o">
                 
-                <t t-set="wiz" t-value="o._context.get('wizard_data', {})" />
                 <t t-set="inv_currency" t-value="o.currency_id" />
 
                 <t t-set="buyer_orders" t-value="[]" />
@@ -38,38 +38,23 @@
                     </t>
                 </t>
 
-                <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service' and 'freight' not in (l.product_id.name or '').lower() and 'insurance' not in (l.product_id.name or '').lower())" />
+                <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service' and 'freight' not in (l.name or '').lower() and 'insurance' not in (l.name or '').lower())" />
                 
                 <t t-set="goods_gross" t-value="sum(product_lines.mapped(lambda l: l.quantity * l.price_unit))" />
                 <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100))" />
                 <t t-set="net_amount_val" t-value="goods_gross - discount_total" />
                 
-                <t t-set="freight_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and 'freight' in (l.product_id.name or '').lower().strip()).mapped('price_subtotal'))" />
-                <t t-set="insurance_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and 'insurance' in (l.product_id.name or '').lower().strip()).mapped('price_subtotal'))" />
+                <t t-set="freight_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'freight' in (l.name or '').lower()).mapped('price_subtotal'))" />
+                <t t-set="insurance_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'insurance' in (l.name or '').lower()).mapped('price_subtotal'))" />
                 
-                <t t-set="net_cf" t-value="net_amount_val + freight_val" />
-                <t t-set="net_cif" t-value="net_cf + insurance_val" />
                 <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity'))" />
-
-                <t t-set="total_pkgs_so" t-value="sum(o.invoice_line_ids.mapped('sale_line_ids.order_id.total_packages'))" />
-
-                <t t-set="word_label" t-value="''" />
-                <t t-set="word_val" t-value="o.amount_total" />
-                
-                <t t-if="wiz.get('amount_summary') == 'cf'">
-                    <t t-set="word_val" t-value="net_cf"/>
-                    <t t-set="word_label" t-value="'C&amp;F'"/>
-                </t>
-                <t t-elif="wiz.get('amount_summary') == 'cif'">
-                    <t t-set="word_val" t-value="net_cif"/>
-                    <t t-set="word_label" t-value="'CIF'"/>
-                </t>
 
                 <div class="page" style="font-size:11px; font-family: 'Times New Roman', serif;">
                     <style>
                         .main-table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
                         .main-table th, .main-table td { border: 1px solid #000; padding: 4px; vertical-align: top; }
-                        .text-right { text-align: right; } .text-center { text-align: center; }
+                        .text-right { text-align: right; } 
+                        .text-center { text-align: center; }
                         .bg-light { background: #f2f2f2; font-weight: bold; }
                     </style>
 
@@ -99,12 +84,12 @@
                             <td width="50%" colspan="2"><strong>Buyer (if other than consignee)</strong><br/><span>Same as Consignee</span></td>
                         </tr>
                         <tr>
-                            <td>Country of Origin: <strong><t t-esc="o.country_origin_id.name"/></strong></td>
-                            <td colspan="2">Final Destination: <strong><t t-esc="o.country_destination_id.name"/></strong></td>
+                            <td>Country of Origin: <strong><t t-esc="o.company_id.country_id.name"/></strong></td>
+                            <td colspan="2">Final Destination: <strong><t t-esc="o.partner_id.country_id.name"/></strong></td>
                         </tr>
                         <tr>
-                            <td>Port of Loading: <strong><t t-esc="o.port_loading"/></strong></td>
-                            <td colspan="2">Port of Discharge: <strong><t t-esc="o.port_discharge"/></strong></td>
+                            <td>Port of Loading: <strong><t t-esc="o.l10n_in_shipping_port_code or 'N/A'"/></strong></td>
+                            <td colspan="2">Port of Discharge: <strong><t t-esc="o.partner_id.city"/></strong></td>
                         </tr>
                     </table>
 
@@ -127,12 +112,12 @@
                                     <td><t t-esc="line.name"/></td>
                                     <td class="text-center"><t t-esc="line.product_id.l10n_in_hsn_code or ''"/></td>
                                     <td class="text-right"><t t-esc="line.quantity"/> Pcs</td>
-                                    <td class="text-right"><t t-esc="round(line.price_unit, 2)"/></td>
-                                    <td class="text-right"><t t-esc="round(line.price_subtotal, 2)"/></td>
+                                    <td class="text-right"><t t-esc="line.price_unit" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td class="text-right"><t t-esc="line.price_subtotal" t-options='{"widget": "float", "precision": 2}'/></td>
                                 </tr>
                                 <t t-set="sr" t-value="sr + 1"/>
                             </t>
-                            <tr style="height:20px;"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                            <tr style="height:20px;"><td colspan="6"></td></tr>
                             <tr class="bg-light">
                                 <td colspan="3" class="text-right">TOTAL</td>
                                 <td class="text-right"><t t-esc="total_pcs"/> Pcs</td>
@@ -148,7 +133,7 @@
                                 <strong>Total PCS:</strong><br/>
                                 <em><t t-esc="int(total_pcs)"/> Pieces Only</em><br/><br/>
                                 <strong>Amount Chargeable (In Words):</strong><br/>
-                                <em><t t-if="word_label"><t t-esc="word_label"/> </t><t t-esc="inv_currency.name"/> <t t-esc="inv_currency.amount_to_text(word_val)"/> Only</em>
+                                <em><t t-esc="inv_currency.name"/> <t t-esc="o.currency_id.amount_to_text(o.amount_total)"/> Only</em>
                             </td>
                             <td width="45%" style="padding:0;">
                                 <table style="width:100%; border:none;">
@@ -161,30 +146,24 @@
                                         <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_amount_val)"/></td>
                                     </tr>
                                     
-                                    <t t-if="wiz.get('amount_summary') in ['cf', 'cif']">
+                                    <t t-if="freight_val &gt; 0">
                                         <tr>
                                             <td style="border:none; border-bottom:1px solid #000; padding:4px;">ADD: FREIGHT (+)</td>
                                             <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(freight_val)"/></td>
                                         </tr>
                                     </t>
-                                    
-                                    <t t-if="wiz.get('amount_summary') == 'cf'">
-                                        <tr class="bg-light">
-                                            <td style="border:none; padding:4px;"><strong>NET C&amp;F</strong></td>
-                                            <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(net_cf)"/></strong></td>
-                                        </tr>
-                                    </t>
-                                    
-                                    <t t-if="wiz.get('amount_summary') == 'cif'">
+
+                                    <t t-if="insurance_val &gt; 0">
                                         <tr>
                                             <td style="border:none; border-bottom:1px solid #000; padding:4px;">ADD: INSURANCE (+)</td>
                                             <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(insurance_val)"/></td>
                                         </tr>
-                                        <tr class="bg-light">
-                                            <td style="border:none; padding:4px;"><strong>NET CIF</strong></td>
-                                            <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(net_cif)"/></strong></td>
-                                        </tr>
                                     </t>
+
+                                    <tr class="bg-light">
+                                        <td style="border:none; padding:4px;"><strong>GRAND TOTAL</strong></td>
+                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(o.amount_total)"/></strong></td>
+                                    </tr>
                                 </table>
                             </td>
                         </tr>
@@ -195,9 +174,9 @@
                             <td width="55%" style="padding:0;">
                                 <table style="width:100%; border:none;">
                                     <tr class="text-center">
-                                        <td style="border:none; border-right:1px solid #000;">Net Wt: <t t-esc="round(o.net_weight or 0, 3)"/> Kgs</td>
-                                        <td style="border:none; border-right:1px solid #000;">Gross Wt: <t t-esc="round(o.gross_weight or 0, 3)"/> Kgs</td>
-                                        <td style="border:none;">Total PKGS: <t t-esc="int(total_pkgs_so) or 0"/></td>
+                                        <td style="border:none; border-right:1px solid #000;">Net Wt: <t t-esc="o.l10n_in_shipping_bill_number or '0'"/> Kgs</td>
+                                        <td style="border:none; border-right:1px solid #000;">Gross Wt: 0 Kgs</td>
+                                        <td style="border:none;">Total PKGS: 0</td>
                                     </tr>
                                 </table>
                                 <div style="padding:5px; border-top:1px solid #000; font-size:10px;">
