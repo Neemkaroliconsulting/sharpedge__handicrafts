@@ -202,34 +202,35 @@ class DescriptionSelectWizard(models.TransientModel):
             if self.report_type == "packing":
 
                 invoices = self.env["account.move"].browse(active_ids)
+            
                 # 🔥 invoice → pickings
                 pickings = invoices.mapped("invoice_line_ids.sale_line_ids.order_id.picking_ids")
             
                 if not pickings:
                     raise UserError("No delivery found for this invoice")
-        
-            # ================= SINGLE PICKING =================
-            if len(pickings) == 1:
-                return self.env.ref(
-                    "export_docs.action_packing_list_delivery"
-                ).with_context(
-                    wizard_data=wizard_data,
-                    invoice_id=invoices.id
-                ).report_action(pickings.ids)
-        
-            # ================= MULTIPLE PICKINGS (BATCH) =================
-            else:
-                # 🔥 create temporary batch
-                batch = self.env["stock.picking.batch"].create({
-                    "picking_ids": [(6, 0, pickings.ids)]
-                })
-        
-                return self.env.ref(
-                    "export_docs.action_packing_list_batch"
-                ).with_context(
-                    wizard_data=wizard_data,
-                    invoice_id=invoices.id
-                ).report_action(batch.id)
+            
+                # ================= SINGLE PICKING =================
+                if len(pickings) == 1:
+                    return self.env.ref(
+                        "export_docs.action_packing_list_delivery"
+                    ).with_context(
+                        wizard_data=wizard_data,
+                        invoice_id=invoices.id
+                    ).report_action(pickings.ids)
+            
+                # ================= MULTIPLE PICKINGS (BATCH) =================
+                else:
+                    # 🔥 create temporary batch
+                    batch = self.env["stock.picking.batch"].create({
+                        "picking_ids": [(6, 0, pickings.ids)]
+                    })
+            
+                    return self.env.ref(
+                        "export_docs.action_packing_list_batch"
+                    ).with_context(
+                        wizard_data=wizard_data,
+                        invoice_id=invoices.id
+                    ).report_action(batch.id)
 
         # ================= EXCEL =================
         if self.output_format == "excel":
