@@ -43,8 +43,22 @@
                 <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100))" />
                 <t t-set="net_amount_val" t-value="goods_gross - discount_total" />
                 
-                <t t-set="freight_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and 'freight' in (l.product_id.name or '').lower()).mapped('price_subtotal'))" />
-                <t t-set="insurance_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and 'insurance' in (l.product_id.name or '').lower()).mapped('price_subtotal'))" />
+                <!-- ✅ FIXED LOGIC -->
+                <t t-set="freight_val"
+                   t-value="sum(o.invoice_line_ids.filtered(
+                       lambda l: not l.display_type and (
+                           'freight' in (l.name or '').lower() or
+                           (l.product_id and 'freight' in (l.product_id.name or '').lower())
+                       )
+                   ).mapped('price_subtotal'))" />
+
+                <t t-set="insurance_val"
+                   t-value="sum(o.invoice_line_ids.filtered(
+                       lambda l: not l.display_type and (
+                           'insurance' in (l.name or '').lower() or
+                           (l.product_id and 'insurance' in (l.product_id.name or '').lower())
+                       )
+                   ).mapped('price_subtotal'))" />
                 
                 <t t-set="net_cf" t-value="net_amount_val + freight_val" />
                 <t t-set="net_cif" t-value="net_cf + insurance_val" />
