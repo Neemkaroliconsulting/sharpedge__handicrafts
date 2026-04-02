@@ -211,7 +211,7 @@
                         <thead>
                             <tr class="bg-light text-center">
                                 <th width="5%">Sr.</th>
-                                <th width="15%">Sr.</th>
+                                <th width="15%">Item Ref.</th>
                                 <th width="30%">Description of Goods</th>
                                 <th width="10%">HSN</th>
                                 <th width="10%">Quantity</th>
@@ -221,7 +221,9 @@
                         </thead>
                         <tbody>
                             <t t-set="sr" t-value="1"/>
-                            <t t-foreach="product_lines" t-as="line">
+                             <t t-foreach="grouped_lines.items()" t-as="grp">
+                                  <tr style="height:28px;"><td colspan="100%" style="font-weight:bold; background:#f2f2f2;">Buyer Order No : <t t-esc="grp[0]" /></td></tr>
+                                 <t t-foreach="grp[1]" t-as="line">
                                 <tr>
                                     <td class="text-center"><t t-esc="sr"/></td>
                                     <td class="text-center">
