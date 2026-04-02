@@ -201,6 +201,29 @@
                             </td>
                         </tr>
                     </table>
+                    <table class="main-table" style="border-top: none; margin-top:5px;">
+    <tr class="bg-light text-center">
+        
+        <!-- Net Weight -->
+        <td>
+            <strong>Net Wt:</strong>
+            <t t-esc="round(sum(product_lines.mapped('quantity')), 2)"/> Kgs
+        </td>
+
+        <!-- Gross Weight -->
+        <td>
+            <strong>Gross Wt:</strong>
+            <t t-esc="round(sum(product_lines.mapped('quantity')), 2)"/> Kgs
+        </td>
+
+        <!-- Total Packages -->
+        <td>
+            <strong>Total PKGS:</strong>
+            <t t-esc="len(product_lines)"/>
+        </td>
+
+    </tr>
+</table>
 
                     <table class="main-table" style="border-top: none;">
                         <tr>
