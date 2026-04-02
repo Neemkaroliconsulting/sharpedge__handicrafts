@@ -287,7 +287,9 @@
                                         <td align="right"><t t-esc="round(line.price_unit,2)" /></td>
                                         <td align="right"><t t-esc="round(line.price_subtotal,2)" /></td>
                                         <td align="right"><t t-esc="round(line.price_subtotal * inv_to_comp_rate, 2)" /></td>
-                                        <td class="text-right"><t t-esc="line.tax_ids[0].amount if line.tax_ids else 0.0"/></td>
+                                        <td>
+                                                <t t-esc="l['rate']"/>
+                                            </td>
                                         <td class="text-right"><t t-esc="0.00 if is_lut else round(line.price_subtotal * (line.tax_ids[0].amount/100) * inv_to_comp_rate, 2)"/></td>              
                                     </tr>
                                     <t t-set="sr" t-value="sr + 1" />
