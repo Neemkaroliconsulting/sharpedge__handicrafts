@@ -29,7 +29,10 @@
                 
                 <t t-set="inv_currency" t-value="o.currency_id" />
                 
-                <t t-set="wiz_summary" t-value="o.env.context.get('amount_summary') or o._context.get('amount_summary') or o.env.context.get('wizard_data', {}).get('amount_summary')" />
+                <t t-set="wiz_summary"
+   t-value="o.env.context.get('wizard_data', {}).get('amount_summary')" />
+                <t t-set="desc_mode"
+   t-value="o.env.context.get('wizard_data', {}).get('description_mode')" />
 
                 <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service' and 'freight' not in (l.name or '').lower() and 'insurance' not in (l.name or '').lower())" />
                 
@@ -43,14 +46,15 @@
                 <t t-set="display_total" t-value="o.amount_total or 0.0" />
                 <t t-set="display_label" t-value="'GRAND TOTAL'" />
 
-                <t t-if="wiz_summary == 'cf'">
-                    <t t-set="display_total" t-value="net_amount_val + freight_val" />
-                    <t t-set="display_label" t-value="'NET C&amp;F'" />
-                </t>
-                <t t-elif="wiz_summary == 'cif'">
-                    <t t-set="display_total" t-value="net_amount_val + freight_val + insurance_val" />
-                    <t t-set="display_label" t-value="'NET CI&amp;F'" />
-                </t>
+                <t t-if="wiz_summary == 'show_net_cf'">
+    <t t-set="display_total" t-value="net_amount_val + freight_val" />
+    <t t-set="display_label" t-value="'NET C&amp;F'" />
+</t>
+
+<t t-elif="wiz_summary == 'show_net_cif'">
+    <t t-set="display_total" t-value="net_amount_val + freight_val + insurance_val" />
+    <t t-set="display_label" t-value="'NET CI&amp;F'" />
+</t>
 
                 <div class="page" style="font-size:11px; font-family: 'Times New Roman', serif;">
                     <style>
@@ -66,7 +70,8 @@
                         <thead>
                             <tr class="bg-light text-center">
                                 <th width="5%">Sr.</th>
-                                <th width="45%">Description of Goods</th>
+                                <th width="15%">Sr.</th>
+                                <th width="30%">Description of Goods</th>
                                 <th width="10%">HSN</th>
                                 <th width="10%">Quantity</th>
                                 <th width="15%">Rate (<t t-esc="inv_currency.name"/>)</th>
@@ -78,7 +83,50 @@
                             <t t-foreach="product_lines" t-as="line">
                                 <tr>
                                     <td class="text-center"><t t-esc="sr"/></td>
-                                    <td><t t-esc="line.name"/></td>
+                                    <td class="text-center">
+
+    <!-- Export Mode -->
+    <t t-if="desc_mode == 'export'">
+        <t t-esc="line.product_id.default_code or ''"/>
+    </t>
+
+    <!-- Buyer Mode -->
+    <t t-elif="desc_mode == 'buyer'">
+        <t t-esc="line.product_id.buyer_code or line.product_id.default_code or ''"/>
+    </t>
+
+    <!-- Foreign Mode -->
+    <t t-elif="desc_mode == 'foreign'">
+        <t t-esc="line.product_id.foreign_code or line.product_id.default_code or ''"/>
+    </t>
+
+    <!-- Fallback -->
+    <t t-else="">
+        <t t-esc="line.product_id.default_code or ''"/>
+    </t>
+
+</td>
+                                    <td>
+    <!-- Exporter Description -->
+    <t t-if="desc_mode == 'export'">
+        <t t-esc="line.name"/>
+    </t>
+
+    <!-- Buyer Description -->
+    <t t-elif="desc_mode == 'buyer'">
+        <t t-esc="line.product_id.description_sale or line.name"/>
+    </t>
+
+    <!-- Foreign Language -->
+    <t t-elif="desc_mode == 'foreign'">
+        <t t-esc="line.product_id.name"/>
+    </t>
+
+    <!-- Default fallback -->
+    <t t-else="">
+        <t t-esc="line.name"/>
+    </t>
+</td>
                                     <td class="text-center"><t t-esc="line.product_id.l10n_in_hsn_code or ''"/></td>
                                     <td class="text-right"><t t-esc="line.quantity"/> Pcs</td>
                                     <td class="text-right"><t t-esc="line.price_unit" t-options='{"widget": "float", "precision": 2}'/></td>
