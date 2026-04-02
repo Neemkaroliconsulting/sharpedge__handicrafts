@@ -202,7 +202,6 @@ class DescriptionSelectWizard(models.TransientModel):
             if self.report_type == "packing":
 
             invoices = self.env["account.move"].browse(active_ids)
-        
             # 🔥 invoice → pickings
             pickings = invoices.mapped("invoice_line_ids.sale_line_ids.order_id.picking_ids")
         
