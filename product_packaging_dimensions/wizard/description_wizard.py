@@ -201,12 +201,12 @@ class DescriptionSelectWizard(models.TransientModel):
                 ).report_action(active_ids)
             if self.report_type == "packing":
 
-            invoices = self.env["account.move"].browse(active_ids)
-            # 🔥 invoice → pickings
-            pickings = invoices.mapped("invoice_line_ids.sale_line_ids.order_id.picking_ids")
-        
-            if not pickings:
-                raise UserError("No delivery found for this invoice")
+                invoices = self.env["account.move"].browse(active_ids)
+                # 🔥 invoice → pickings
+                pickings = invoices.mapped("invoice_line_ids.sale_line_ids.order_id.picking_ids")
+            
+                if not pickings:
+                    raise UserError("No delivery found for this invoice")
         
             # ================= SINGLE PICKING =================
             if len(pickings) == 1:
