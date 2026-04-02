@@ -9,6 +9,7 @@
         <field name="margin_bottom">15</field>
         <field name="margin_left">15</field>
         <field name="margin_right">15</field>
+        <field name="header_line" eval="False"/>
     </record>
 
     <record id="action_export_invoice_report" model="ir.actions.report">
@@ -27,32 +28,27 @@
             <t t-foreach="docs" t-as="o">
                 
                 <t t-set="inv_currency" t-value="o.currency_id" />
-                <t t-set="wiz" t-value="o._context.get('wizard_data', {})" />
+                
+                <t t-set="wiz_summary" t-value="o.env.context.get('amount_summary') or o._context.get('amount_summary') or o.env.context.get('wizard_data', {}).get('amount_summary')" />
 
                 <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service' and 'freight' not in (l.name or '').lower() and 'insurance' not in (l.name or '').lower())" />
                 
-                <t t-set="goods_gross" t-value="sum(product_lines.mapped(lambda l: l.quantity * l.price_unit))" />
-                <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100))" />
-                <t t-set="net_amount_val" t-value="goods_gross - discount_total" />
-                
+                <t t-set="net_amount_val" t-value="sum(product_lines.mapped('price_subtotal'))" />
                 <t t-set="freight_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'freight' in (l.name or '').lower()).mapped('price_subtotal'))" />
                 <t t-set="insurance_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'insurance' in (l.name or '').lower()).mapped('price_subtotal'))" />
-                
+                <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100))" />
                 <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity'))" />
 
-                <t t-set="final_total_val" t-value="net_amount_val" />
-                <t t-set="final_label" t-value="'GRAND TOTAL'" />
+                <t t-set="display_total" t-value="o.amount_total" />
+                <t t-set="display_label" t-value="'GRAND TOTAL'" />
 
-                <t t-if="wiz.get('amount_summary') == 'cf'">
-                    <t t-set="final_total_val" t-value="net_amount_val + freight_val" />
-                    <t t-set="final_label" t-value="'NET C&amp;F'" />
+                <t t-if="wiz_summary == 'cf'">
+                    <t t-set="display_total" t-value="net_amount_val + freight_val" />
+                    <t t-set="display_label" t-value="'NET C&amp;F'" />
                 </t>
-                <t t-elif="wiz.get('amount_summary') == 'cif'">
-                    <t t-set="final_total_val" t-value="net_amount_val + freight_val + insurance_val" />
-                    <t t-set="final_label" t-value="'NET CI&amp;F'" />
-                </t>
-                <t t-else="">
-                    <t t-set="final_total_val" t-value="o.amount_total" />
+                <t t-elif="wiz_summary == 'cif'">
+                    <t t-set="display_total" t-value="net_amount_val + freight_val + insurance_val" />
+                    <t t-set="display_label" t-value="'NET CI&amp;F'" />
                 </t>
 
                 <div class="page" style="font-size:11px; font-family: 'Times New Roman', serif;">
@@ -64,7 +60,7 @@
                         .bg-light { background: #f2f2f2; font-weight: bold; }
                     </style>
 
-                    <h3 class="text-center" style="margin-bottom:5px;">INVOICE</h3>
+                    <h3 class="text-center" style="margin-bottom:10px;">INVOICE</h3>
 
                     <table class="main-table">
                         <thead>
@@ -105,7 +101,7 @@
                                 <strong>Total PCS:</strong><br/>
                                 <em><t t-esc="int(total_pcs)"/> Pieces Only</em><br/><br/>
                                 <strong>Amount Chargeable (In Words):</strong><br/>
-                                <em><t t-esc="inv_currency.name"/> <t t-esc="o.currency_id.amount_to_text(final_total_val)"/> Only</em>
+                                <em><t t-esc="inv_currency.name"/> <t t-esc="o.currency_id.amount_to_text(display_total)"/> Only</em>
                             </td>
                             <td width="45%" style="padding:0;">
                                 <table style="width:100%; border:none;">
@@ -133,9 +129,11 @@
                                     </t>
 
                                     <tr class="bg-light">
-                                        <td style="border:none; padding:4px;"><strong><t t-esc="final_label"/></strong></td>
+                                        <td style="border:none; padding:4px;">
+                                            <strong><t t-esc="display_label"/></strong>
+                                        </td>
                                         <td class="text-right" style="border:none; border-left:1px solid #000;">
-                                            <strong><t t-esc="inv_currency.format(final_total_val)"/></strong>
+                                            <strong><t t-esc="inv_currency.format(display_total)"/></strong>
                                         </td>
                                     </tr>
                                 </table>
@@ -145,7 +143,7 @@
 
                     <table class="main-table" style="border-top: none;">
                         <tr>
-                            <td width="55%" style="padding:5px; font-size:10px;">
+                            <td width="55%" style="padding:5px;">
                                 <strong>DECLARATION:</strong> We declare that this invoice shows the actual price of the goods described.
                             </td>
                             <td width="45%" class="text-center" style="vertical-align:bottom; height:60px;">
