@@ -406,8 +406,8 @@
                                 <tr>
                                     <td><t t-esc="l['hsn']" /></td>
                                     <td><t t-esc="o.company_id.currency_id.format(l['taxable'] * inv_to_comp_rate)" /></td>
-                                    <td><t t-if="is_lut and l['hsn'] != '9965'">0.0</t><t t-else=""><t t-esc="l['rate']" /></t></td>
-                                    <td><t t-if="is_lut and l['hsn'] != '9965'">₹ 0.00</t><t t-else=""><t t-esc="o.company_id.currency_id.format((l['taxable'] * l['rate'] / 100) * inv_to_comp_rate)" /></t></td>
+                                    <td><t t-if="is_lut "><t t-else="ine.tax_ids[0].amount if line.tax_ids else 0.0""></t><t t-esc="l['rate']" /></t></td>
+                                    <td><t t-if="is_lut ">₹ 0.00</t><t t-else=""><t t-esc="o.company_id.currency_id.format((l['taxable'] * l['rate'] / 100) * inv_to_comp_rate)" /></t></td>
                                 </tr>
                             </t>
                         </tbody>
