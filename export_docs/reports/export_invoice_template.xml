@@ -275,12 +275,12 @@
                                 </tr>
                                 <t t-set="sr" t-value="sr + 1"/>
                             </t>
-                            <tr class="bg-light">
+                            <!-- <tr class="bg-light">
                                 <td colspan="3" class="text-right">TOTAL</td>
                                 <td class="text-right"><t t-esc="total_pcs"/> Pcs</td>
                                 <td></td>
                                 <td class="text-right"><t t-esc="inv_currency.format(goods_gross)"/></td>
-                            </tr>
+                            </tr> -->
                         </tbody>
                     </table>
 
