@@ -166,12 +166,14 @@
                                             <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(freight_val)"/></td>
                                         </tr>
                                     </t>
+                                    
                                     <t t-if="wiz.get('amount_summary') == 'cf'">
                                         <tr class="bg-light">
                                             <td style="border:none; padding:4px;"><strong>NET C&amp;F</strong></td>
                                             <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(net_cf)"/></strong></td>
                                         </tr>
                                     </t>
+                                    
                                     <t t-if="wiz.get('amount_summary') == 'cif'">
                                         <tr>
                                             <td style="border:none; border-bottom:1px solid #000; padding:4px;">ADD: INSURANCE (+)</td>
