@@ -59,7 +59,7 @@
                     </style>
 
                     <h3 class="text-center" style="margin-bottom:5px;">INVOICE</h3>
-
+<!-- 
                     <table class="main-table">
                         <tr>
                             <td width="50%" rowspan="2">
@@ -91,7 +91,7 @@
                             <td>Port of Loading: <strong><t t-esc="o.l10n_in_shipping_port_code or 'N/A'"/></strong></td>
                             <td colspan="2">Port of Discharge: <strong><t t-esc="o.partner_id.city"/></strong></td>
                         </tr>
-                    </table>
+                    </table> -->
 
                     <table class="main-table" style="border-top: none;">
                         <thead>
