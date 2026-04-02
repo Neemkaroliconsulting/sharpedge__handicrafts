@@ -199,6 +199,12 @@ class DescriptionSelectWizard(models.TransientModel):
                 ).with_context(
                     wizard_data=wizard_data
                 ).report_action(active_ids)
+            if self.report_type == "packing":
+                return self.env.ref(
+                    "export_docs.action_packing_list_report"
+                ).with_context(
+                    wizard_data=wizard_data
+                ).report_action(active_ids)
 
         # ================= EXCEL =================
         if self.output_format == "excel":
