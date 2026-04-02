@@ -343,16 +343,24 @@
                         </tr>
                     </table>
                     <table class="main-table" style="border-top: none;">
-                        <tr>
-                            <td width="55%" style="padding:0;">
-                                <table style="width:100%; border:none;">
-                                    <tr class="text-center">
-                                        <td style="border:none; border-right:1px solid #000;">Net Wt: <t t-esc="round(o.net_weight or 0, 3)"/> Kgs</td>
-                                        <td style="border:none; border-right:1px solid #000;">Gross Wt: <t t-esc="round(o.gross_weight or 0, 3)"/> Kgs</td>
-                                        <td style="border:none;">Total PKGS: <t t-esc="int(total_pkgs_so) or 0"/></td>
-                                    </tr>
-                                </tr>
-                                </table>
+    <tr>
+        <td width="55%" style="padding:0;">
+            <table style="width:100%; border:none;">
+                <tr class="text-center">
+                    <td style="border:none; border-right:1px solid #000;">
+                        Net Wt: <t t-esc="round(o.net_weight or 0, 3)"/> Kgs
+                    </td>
+                    <td style="border:none; border-right:1px solid #000;">
+                        Gross Wt: <t t-esc="round(o.gross_weight or 0, 3)"/> Kgs
+                    </td>
+                    <td style="border:none;">
+                        Total PKGS: <t t-esc="int(total_pkgs_so) or 0"/>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 
                     <table class="main-table" style="border-top: none;">
                         <tr>
