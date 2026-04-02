@@ -28,15 +28,8 @@
             <t t-foreach="docs" t-as="o">
                 
                 <t t-set="inv_currency" t-value="o.currency_id" />
-
-                <t t-set="buyer_orders" t-value="[]" />
-                <t t-foreach="o.invoice_line_ids" t-as="l">
-                    <t t-foreach="l.sale_line_ids" t-as="sl">
-                        <t t-if="sl.order_id and sl.order_id.buyer_order_no and sl.order_id.buyer_order_no not in buyer_orders">
-                            <t t-set="buyer_orders" t-value="buyer_orders + [sl.order_id.buyer_order_no]" />
-                        </t>
-                    </t>
-                </t>
+                
+                <t t-set="wiz" t-value="o._context.get('wizard_data', {})" />
 
                 <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service' and 'freight' not in (l.name or '').lower() and 'insurance' not in (l.name or '').lower())" />
                 
@@ -49,6 +42,17 @@
                 
                 <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity'))" />
 
+                <t t-set="word_val" t-value="net_amount_val" />
+                <t t-if="wiz.get('amount_summary') == 'cf'">
+                    <t t-set="word_val" t-value="net_amount_val + freight_val" />
+                </t>
+                <t t-if="wiz.get('amount_summary') == 'cif'">
+                    <t t-set="word_val" t-value="net_amount_val + freight_val + insurance_val" />
+                </t>
+                <t t-if="not wiz.get('amount_summary')">
+                    <t t-set="word_val" t-value="o.amount_total" />
+                </t>
+
                 <div class="page" style="font-size:11px; font-family: 'Times New Roman', serif;">
                     <style>
                         .main-table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
@@ -59,41 +63,8 @@
                     </style>
 
                     <h3 class="text-center" style="margin-bottom:5px;">INVOICE</h3>
-<!-- 
-                    <table class="main-table">
-                        <tr>
-                            <td width="50%" rowspan="2">
-                                <strong>Exporter</strong><br/>
-                                <strong style="font-size:13px;"><t t-esc="o.company_id.name"/></strong><br/>
-                                <t t-esc="o.company_id.street"/>, <t t-esc="o.company_id.city"/><br/>
-                                <strong>GSTIN:</strong> <t t-esc="o.company_id.vat"/>
-                            </td>
-                            <td width="25%"><strong>Invoice No.</strong><br/><t t-esc="o.name"/></td>
-                            <td width="25%"><strong>Dated</strong><br/><t t-esc="o.invoice_date"/></td>
-                        </tr>
-                        <tr>
-                            <td width="50%" colspan="2"><strong>Buyer's Order No.</strong><br/><t t-esc="' / '.join(buyer_orders)"/></td>
-                        </tr>
-                        <tr>
-                            <td width="50%">
-                                <strong>Consignee</strong><br/>
-                                <strong><t t-esc="o.partner_id.name"/></strong><br/>
-                                <t t-esc="o.partner_id.street"/><br/>
-                                <t t-esc="o.partner_id.city"/>, <t t-esc="o.partner_id.country_id.name"/>
-                            </td>
-                            <td width="50%" colspan="2"><strong>Buyer (if other than consignee)</strong><br/><span>Same as Consignee</span></td>
-                        </tr>
-                        <tr>
-                            <td>Country of Origin: <strong><t t-esc="o.company_id.country_id.name"/></strong></td>
-                            <td colspan="2">Final Destination: <strong><t t-esc="o.partner_id.country_id.name"/></strong></td>
-                        </tr>
-                        <tr>
-                            <td>Port of Loading: <strong><t t-esc="o.l10n_in_shipping_port_code or 'N/A'"/></strong></td>
-                            <td colspan="2">Port of Discharge: <strong><t t-esc="o.partner_id.city"/></strong></td>
-                        </tr>
-                    </table> -->
 
-                    <table class="main-table" style="border-top: none;">
+                    <table class="main-table">
                         <thead>
                             <tr class="bg-light text-center">
                                 <th width="5%">Sr.</th>
@@ -133,7 +104,7 @@
                                 <strong>Total PCS:</strong><br/>
                                 <em><t t-esc="int(total_pcs)"/> Pieces Only</em><br/><br/>
                                 <strong>Amount Chargeable (In Words):</strong><br/>
-                                <em><t t-esc="inv_currency.name"/> <t t-esc="o.currency_id.amount_to_text(o.amount_total)"/> Only</em>
+                                <em><t t-esc="inv_currency.name"/> <t t-esc="o.currency_id.amount_to_text(word_val)"/> Only</em>
                             </td>
                             <td width="45%" style="padding:0;">
                                 <table style="width:100%; border:none;">
@@ -162,7 +133,7 @@
 
                                     <tr class="bg-light">
                                         <td style="border:none; padding:4px;"><strong>GRAND TOTAL</strong></td>
-                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(o.amount_total)"/></strong></td>
+                                        <td class="text-right" style="border:none; border-left:1px solid #000;"><strong><t t-esc="inv_currency.format(word_val)"/></strong></td>
                                     </tr>
                                 </table>
                             </td>
