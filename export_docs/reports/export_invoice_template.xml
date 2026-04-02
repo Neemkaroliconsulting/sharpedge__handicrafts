@@ -65,6 +65,141 @@
                     </style>
 
                     <h3 class="text-center" style="margin-bottom:10px;">INVOICE</h3>
+                    <!-- ================= HEADER ================= -->
+                    <table>
+                        <!-- ROW 1 : EXPORTER + INVOICE DETAILS -->
+                        <tr>
+                            <td width="50%">
+                                <table width="100%" style="border:none;">
+                                    <tr>
+
+                                        <td width="25%"
+                                            style="border:none;  vertical-align:top;">
+                                            <strong>Exporter</strong>
+                                            <t t-if="o.company_id.logo">
+                                                <img t-att-src="image_data_uri(o.company_id.logo)"
+                                                    style="max-height:40px; max-width:70px;" />
+                                            </t>
+                                        </td>
+                                        <td width="75%" style="border:none;">
+
+                                            <br />
+                                            <strong>
+                                                <t t-esc="o.company_id.name" />
+                                            </strong>
+                                            <br />
+                                            <t t-esc="o.company_id.street" />
+                                            <t t-esc="o.company_id.city" />
+                                            <br />
+                                            <t t-esc="o.company_id.country_id.name" />
+                                            <br />
+                                            <strong>GSTIN:</strong>
+                                            <t t-esc="o.company_id.vat" />
+                                        </td>
+
+
+                                    </tr>
+                                </table>
+
+                            </td>
+
+                            <td width="50%">
+                                <strong>Invoice No:</strong>
+                                <t t-esc="o.name" />
+                                <br />
+                                <strong>Date:</strong>
+                                <t t-esc="o.invoice_date" />
+                                <br />
+                                <strong>Exporter Ref:</strong>
+                                <t t-esc="o.exporter_reference" />
+                                <br />
+                                <strong>Buyer Order No:</strong>
+                                <t t-esc="' / '.join(buyer_orders)" />
+                            </td>
+                        </tr>
+
+                        <!-- ROW 2 : CONSIGNEE + BUYER -->
+                        <tr>
+                            <td width="50%">
+                                <strong>Consignee</strong>
+                                <br />
+                                <strong>
+                                    <t t-esc="o.consignee_id.name" />
+                                </strong>
+                                <br />
+                                <t t-esc="o.consignee_id.street" />
+                                <t t-esc="o.consignee_id.city" />
+                                <br />
+                                <t t-esc="o.consignee_id.country_id.name" />
+                            </td>
+
+                            <td width="50%">
+                                <strong>Buyer (if other than consignee)</strong>
+                                <br />
+                                <t t-esc="o.buyer_id.name" />
+                            </td>
+                        </tr>
+
+                        <!-- ROW 3 : ORIGIN + DESTINATION -->
+                        <tr>
+                            <td> Country of Origin<br />
+            <strong>
+                                    <t t-esc="o.country_origin_id.name" />
+                                </strong>
+                            </td>
+                            <td> Final Destination<br />
+            <strong>
+                                    <t t-esc="o.country_destination_id.name" />
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <!-- ROW 4 : SHIPPING -->
+                        <tr>
+                            <td> Pre-Carriage By<br />
+            <strong>
+                                    <t t-esc="o.pre_carriage_by" />
+                                </strong>
+                            </td>
+                            <td> Place of Receipt<br />
+            <strong>
+                                    <t t-esc="o.place_of_receipt" />
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td> Port of Loading<br />
+            <strong>
+                                    <t t-esc="o.port_loading" />
+                                </strong>
+                            </td>
+                            <td> Port of Discharge<br />
+            <strong>
+                                    <t t-esc="o.port_discharge" />
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <!-- ROW 5 : TERMS -->
+                        <tr>
+                            <td colspan="2"> Terms of Delivery &amp; Payment<br />
+            <t
+                                    t-esc="o.terms_delivery" /> / <t t-esc="o.payment_terms_export" />
+                            </td>
+                        </tr>
+                    </table>
+
+
+
+                    <t t-set="grouped_lines" t-value="{}" />
+                    <t t-foreach="o.invoice_line_ids" t-as="l">
+                        <t t-if="l.show_in_invoice and l.product_id and l.product_id.type != 'service'">
+                            <t t-set="bo" t-value="(l.sale_line_ids and l.sale_line_ids[0].order_id.buyer_order_no) or 'NO BUYER ORDER'" />
+                            <t t-set="current" t-value="grouped_lines.get(bo, [])" />
+                            <t t-set="grouped_lines" t-value="dict(grouped_lines, **{bo: current + [l]})" />
+                        </t>
+                    </t>
 
                     <table class="main-table">
                         <thead>
