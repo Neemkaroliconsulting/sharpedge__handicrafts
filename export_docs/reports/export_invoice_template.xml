@@ -201,7 +201,7 @@
                             </td>
                         </tr>
                     </table>
-                    <table class="main-table" style="border-top: none; margin-top:5px;">
+                    <table class="main-table" style="border-top: none;">
     <tr class="bg-light text-center">
         
         <!-- Net Weight -->
