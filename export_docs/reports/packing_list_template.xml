@@ -113,9 +113,9 @@
                 <table>
                     <tr>
                         <td width="50%" style="vertical-align:top;">
-                            <strong>Exporter</strong>
-                            <br />
                             <table styele="border:none;">
+                                 <strong>Exporter</strong>
+                            <br />
                                 <!-- LOGO -->
                                 <td width="25%" style="vertical-align:top; border:none;">
                                     <t t-if="sale.company_id.logo">
