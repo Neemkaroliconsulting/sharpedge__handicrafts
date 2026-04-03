@@ -36,7 +36,28 @@
    t-value="o.env.context.get('wizard_data', {}).get('description_mode')" />
 
                 <t t-set="product_lines" t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type != 'service' and 'freight' not in (l.name or '').lower() and 'insurance' not in (l.name or '').lower())" />
-                
+                      <!-- ✅ FREIGHT + INSURANCE LOGIC -->
+
+<t t-set="apply_freight" t-value="wiz.get('apply_freight')"/>
+<t t-set="apply_insurance" t-value="wiz.get('apply_insurance')"/>
+
+<t t-set="total_qty" t-value="sum(product_lines.mapped('quantity'))"/>
+
+<t t-if="apply_freight or apply_insurance">
+
+    <!-- SINGLE LINE -->
+    <t t-if="len(product_lines) == 1">
+        <t t-set="freight_per_unit" t-value="freight_val / product_lines[0].quantity if (apply_freight and product_lines[0].quantity) else 0"/>
+        <t t-set="insurance_per_unit" t-value="insurance_val / product_lines[0].quantity if (apply_insurance and product_lines[0].quantity) else 0"/>
+    </t>
+
+    <!-- MULTI LINE -->
+    <t t-else="">
+        <t t-set="freight_per_unit" t-value="freight_val / total_qty if apply_freight else 0"/>
+        <t t-set="insurance_per_unit" t-value="insurance_val / total_qty if apply_insurance else 0"/>
+    </t>
+
+</t>          
                 <t t-set="goods_gross" t-value="sum(product_lines.mapped('price_subtotal')) or 0.0" />
                 <t t-set="freight_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'freight' in (l.name or '').lower()).mapped('price_subtotal')) or 0.0" />
                 <t t-set="insurance_val" t-value="sum(o.invoice_line_ids.filtered(lambda l: 'insurance' in (l.name or '').lower()).mapped('price_subtotal')) or 0.0" />
@@ -315,11 +336,25 @@
                 </td>
 
                 <td class="text-right">
-                    <t t-esc="line.price_unit" t-options='{"widget": "float", "precision": 2}'/>
+                   <t t-set="final_price" t-value="line.price_unit"/>
+
+                    <t t-if="apply_freight or apply_insurance">
+                        <t t-set="final_price" t-value="final_price + freight_per_unit + insurance_per_unit"/>
+                    </t>
+                    
+                    <t t-esc="final_price" t-options='{"widget": "float", "precision": 2}'/>
                 </td>
 
                 <td class="text-right">
-                    <t t-esc="line.price_subtotal" t-options='{"widget": "float", "precision": 2}'/>
+                    <t t-set="final_price" t-value="line.price_unit"/>
+
+                    <t t-if="apply_freight or apply_insurance">
+                        <t t-set="final_price" t-value="final_price + freight_per_unit + insurance_per_unit"/>
+                    </t>
+                    
+                    <t t-set="final_subtotal" t-value="final_price * line.quantity"/>
+                    
+                    <t t-esc="final_subtotal" t-options='{"widget": "float", "precision": 2}'/>
                 </td>
             </tr>
 
