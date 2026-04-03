@@ -108,17 +108,23 @@
                                         <t t-esc="sale.company_id.street" />
                                         <br />
                                     </t>
-
-                                    <t t-if="sale.company_id.city">
-                                        <t t-esc="sale.company_id.city" />
+                                    <t t-if="sale.company_id.street2">
+                                            <t t-esc="sale.company_id.street2"/> - <t t-esc="sale.company_id.zip"/><br/>
                                     </t>
 
+                                    <!-- <t t-if="sale.company_id.city">
+                                        <t t-esc="sale.company_id.city" />
+                                    </t> -->
+
                                     <t t-if="sale.company_id.country_id">
-                                        <t t-if="sale.company_id.city">, </t>
+                                        <t t-if="sale.company_id.state_id.name">, </t>
                                         <t t-esc="sale.company_id.country_id.name" />
                                     </t>
                                     <br />
-
+                                     <t t-if="sale.company_id.phone">
+                                                <t t-esc="sale.company_id.phone"/> , <t t-esc="sale.company_id.mobile"/> <br/>
+                                        </t>
+                                        
                                     <t t-if="sale.company_id.vat">
                                         <strong>GSTIN :</strong>
                                         <t t-esc="sale.company_id.vat" />
