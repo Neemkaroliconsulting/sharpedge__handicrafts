@@ -88,17 +88,21 @@
                                             </t>
                                         </td>
                                         <td width="75%" style="border:none;">
-
-                                            <br />
                                             <strong>
                                                 <t t-esc="o.company_id.name" />
                                             </strong>
                                             <br />
                                             <t t-esc="o.company_id.street" />
-                                            <t t-esc="o.company_id.city" />
                                             <br />
+                                             <t t-if="o.company_id.street2">
+                                            <t t-esc="o.company_id.street2"/> - <t t-esc="o.company_id.zip"/><br/>
+                                            </t>
+                                            <t t-esc="o.company_id.state_id.name"/> , 
                                             <t t-esc="o.company_id.country_id.name" />
                                             <br />
+                                            <t t-if="o.company_id.phone">
+                                                <t t-esc="o.company_id.phone"/> , <t t-esc="o.company_id.mobile"/> <br/>
+                                            </t>
                                             <strong>GSTIN:</strong>
                                             <t t-esc="o.company_id.vat" />
                                         </td>
