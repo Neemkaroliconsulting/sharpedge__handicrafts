@@ -115,7 +115,7 @@
                         <td width="50%" style="vertical-align:top;">
                             <strong>Exporter</strong>
                             <br />
-                            <table>
+                            <table styele="border:none;">
                                 <!-- LOGO -->
                                 <td width="25%" style="vertical-align:top; border:none;">
                                     <t t-if="sale.company_id.logo">
