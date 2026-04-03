@@ -87,20 +87,7 @@
 "/>
                 <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity')) or 0" />
 
-                <t t-if="wiz_summary == 'show_net_cf'">
-    <t t-set="display_total"
-       t-value="net_amount_val if apply_freight else (net_amount_val + freight_val)" />
-</t>
-
-<t t-elif="wiz_summary == 'show_net_cif'">
-    <t t-set="display_total"
-       t-value="
-       net_amount_val
-       if (apply_freight or apply_insurance)
-       else (net_amount_val + freight_val + insurance_val)
-       " />
-</t>
-                <t t-set="display_label" t-value="'GRAND TOTAL'" />
+                          <t t-set="display_label" t-value="'GRAND TOTAL'" />
 
                 <t t-if="wiz_summary == 'show_net_cf'">
     <t t-set="display_total" t-value="net_amount_val + freight_val" />
