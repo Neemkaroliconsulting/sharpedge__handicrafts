@@ -70,10 +70,31 @@
 
 </t>
                 <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100)) or 0.0" />
-                <t t-set="net_amount_val" t-value="goods_gross - discount_total" />
+                <t t-set="net_amount_val"
+   t-value="
+   (
+       sum([
+           (line.quantity * (
+               line.price_unit
+               + (freight_per_unit if apply_freight else 0)
+               + (insurance_per_unit if apply_insurance else 0)
+           ))
+           for line in product_lines
+       ])
+       if (apply_freight or apply_insurance)
+       else (goods_gross - discount_total)
+   )
+"/>
                 <t t-set="total_pcs" t-value="sum(product_lines.mapped('quantity')) or 0" />
 
-                <t t-set="display_total" t-value="o.amount_total or 0.0" />
+                <t t-set="display_total"
+   t-value="
+   (
+       net_amount_val
+       if (apply_freight or apply_insurance or wiz_summary in ['show_net_cf','show_net_cif'])
+       else o.amount_total
+   )
+"/>
                 <t t-set="display_label" t-value="'GRAND TOTAL'" />
 
                 <t t-if="wiz_summary == 'show_net_cf'">
@@ -407,14 +428,16 @@
                                         <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(net_amount_val)"/></td>
                                     </tr>
                                     
-                                    <t t-if="freight_val &gt; 0">
+                                    <!-- <t t-if="freight_val &gt; 0"> -->
+                                        <t t-if="freight_val &gt; 0 and not wiz.get('apply_freight')">
                                         <tr>
                                             <td style="border:none; border-bottom:1px solid #000; padding:4px;">FREIGHT (+)</td>
                                             <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(freight_val)"/></td>
                                         </tr>
                                     </t>
 
-                                    <t t-if="insurance_val &gt; 0">
+                                    <!-- <t t-if="insurance_val &gt; 0"> -->
+                                        <t t-if="insurance_val &gt; 0 and not wiz.get('apply_insurance')">
                                         <tr>
                                             <td style="border:none; border-bottom:1px solid #000; padding:4px;">INSURANCE (+)</td>
                                             <td class="text-right" style="border:none; border-bottom:1px solid #000; border-left:1px solid #000;"><t t-esc="inv_currency.format(insurance_val)"/></td>
