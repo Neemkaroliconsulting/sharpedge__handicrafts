@@ -87,10 +87,9 @@
 
                         <!-- LEFT : EXPORTER (COMMON) -->
                         <td width="50%" style="padding:6px;">
-                            <strong>Exporter</strong>
-                            <br />
-
                             <table style="border:none;">
+                                <strong>Exporter</strong>
+                            <br />
                                 <!-- LOGO -->
                                 <td width="25%" style="vertical-align:top; border:none;">
                                     <t t-if="sale.company_id.logo">
