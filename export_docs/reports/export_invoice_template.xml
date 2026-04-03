@@ -454,7 +454,7 @@
                                             <strong><t t-esc="display_label"/></strong>
                                         </td>
                                         <td class="text-right" style="border:none; border-left:1px solid #000;">
-                                            <strong><t t-esc="inv_currency.format(display_total)"/></strong>
+                                            <strong><t t-esc="inv_currency.format(display_total or 0)"/></strong>
                                         </td>
                                     </tr>
                                 </table>
