@@ -89,10 +89,11 @@
                                                 <t t-esc="o.company_id.name" />
                                             </strong>
                                             <br />
-                                            <t t-esc="o.company_id.street" />
+                                            <t t-esc="o.company_id.partner_id.contact_address"/>
+                                            <!-- <t t-esc="o.company_id.street" />
                                             <t t-esc="o.company_id.city" />
                                             <br />
-                                            <t t-esc="o.company_id.country_id.name" />
+                                            <t t-esc="o.company_id.country_id.name" /> -->
                                             <t t-esc="o.company_id.mobile" />
                                             <br />
                                             <strong>GSTIN:</strong>
