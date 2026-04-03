@@ -89,6 +89,9 @@ class DescriptionSelectWizard(models.TransientModel):
         ('show_net_cf', 'Show Net C&F'),
         ('show_net_cif', 'Show Net CI&F'),
     ],)
+
+    apply_freight = fields.Boolean(string="Apply Freight", default=False)
+    apply_insurance = fields.Boolean(string="Apply Insurance", default=False)
         
         
 
@@ -181,6 +184,8 @@ class DescriptionSelectWizard(models.TransientModel):
             # "show_net_cf": self.show_net_cf,
             # "show_net_cif": self.show_net_cif,
             "amount_summary": self.amount_summary,
+            "apply_freight": self.apply_freight,
+            "apply_insurance": self.apply_insurance,
         }
 
         # ================= PDF =================
