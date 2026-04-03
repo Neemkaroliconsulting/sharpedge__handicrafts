@@ -69,58 +69,68 @@
                     <!-- ================= HEADER ================= -->
                     <table class="main-table">
                         <!-- ROW 1 : EXPORTER + INVOICE DETAILS -->
-                       <tr>
-    <td width="50%">
+                      <tr>
+                            <td width="50%">
+                                <table width="100%" style="border:none;">
+                                    <tr>
 
-        <strong>Exporter</strong><br/>
+                                        <td width="25%"
+                                            style="border:none;  vertical-align:top;">
+                                            <strong>Exporter</strong>
+                                            <t t-if="o.company_id.logo">
+                                                <img t-att-src="image_data_uri(o.company_id.logo)"
+                                                    style="max-height:40px; max-width:70px;" />
+                                            </t>
+                                        </td>
+                                        <td width="75%" style="border:none;">
+                                            <strong>
+                                                <t t-esc="o.company_id.name" />
+                                            </strong>
+                                            <br />
+                                            <t t-esc="o.company_id.street" />
+                                            <br />
+                                             <t t-if="o.company_id.street2">
+                                            <t t-esc="o.company_id.street2"/> - <t t-esc="o.company_id.zip"/><br/>
+                                            </t>
+                                            <t t-esc="o.company_id.state_id.name"/> , 
+                                            <t t-esc="o.company_id.country_id.name" />
+                                            <br />
+                                            <t t-if="o.company_id.phone">
+                                                <t t-esc="o.company_id.phone"/> , <t t-esc="o.company_id.mobile"/> <br/>
+                                            </t>
+                                            <strong>GSTIN:</strong>
+                                            <t t-esc="o.company_id.vat" />
+                                        </td>
 
-        <t t-if="o.company_id.logo">
-            <img t-att-src="image_data_uri(o.company_id.logo)"
-                 style="max-height:40px; max-width:70px;" />
-        </t>
 
-        <br/>
+                                    </tr>
+                                </table>
 
-        <strong><t t-esc="o.company_id.name"/></strong><br/>
+                            </td>
 
-        <t t-esc="o.company_id.street"/><br/>
-        <t t-if="o.company_id.street2">
-            <t t-esc="o.company_id.street2"/><br/>
-        </t>
-
-        <t t-esc="o.company_id.city"/> - <t t-esc="o.company_id.zip"/><br/>
-        <t t-esc="o.company_id.state_id.name"/><br/>
-        <t t-esc="o.company_id.country_id.name"/><br/>
-
-        <t t-if="o.company_id.phone">
-            <t t-esc="o.company_id.phone"/><br/>
-        </t>
-
-        <strong>GSTIN:</strong>
-        <t t-esc="o.company_id.vat"/>
-
-    </td>
-
-    <td width="50%">
-        <strong>Invoice No:</strong>
-        <t t-esc="o.name" /><br/>
-        <strong>Date:</strong>
-        <t t-esc="o.invoice_date" /><br/>
-        <strong>Exporter Ref:</strong>
-        <t t-esc="o.exporter_reference" /><br/>
-        <strong>Buyer Order No:</strong>
+                            <td width="50%">
+                                <strong>Invoice No:</strong>
+                                <t t-esc="o.name" />
+                                <br />
+                                <strong>Date:</strong>
+                                <t t-esc="o.invoice_date" />
+                                <br />
+                                <strong>Exporter Ref:</strong>
+                                <t t-esc="o.exporter_reference" />
+                                <br />
+                                <strong>Buyer Order No:</strong>
+                                <t t-esc="' / '.join(buyer_orders)" />
+                            </td>
+                        </tr>
+        <!-- <strong>Buyer Order No:</strong>
 
         <t t-set="buyer_orders"
            t-value="list(set([l.sale_line_ids[0].order_id.buyer_order_no 
            for l in o.invoice_line_ids 
            if l.sale_line_ids and l.sale_line_ids[0].order_id.buyer_order_no]))" />
 
-        <t t-esc="' / '.join(buyer_orders) or ''"/>
+        <t t-esc="' / '.join(buyer_orders) or ''"/> -->
 
-    </td>
-                           
-    
-</tr>
                         <!-- ROW 2 : CONSIGNEE + BUYER -->
                         <tr>
                             <td width="50%">
