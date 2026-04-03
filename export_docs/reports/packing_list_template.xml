@@ -6,7 +6,6 @@
 
             <t t-set="wiz" t-value="context.get('wizard_data', {})" />
             <t t-set="batch" t-value="docs[0]" />
-
             <!-- Invoices passed from context -->
             <t t-set="invoices"
                 t-value="env['account.move'].browse(context.get('invoice_id'))" />
