@@ -119,7 +119,12 @@
                                 <t t-esc="o.exporter_reference" />
                                 <br />
                                 <strong>Buyer Order No:</strong>
-                                <t t-esc="' / '.join(buyer_orders)" />
+                                <t t-set="buyer_orders"
+                                   t-value="list(set([l.sale_line_ids[0].order_id.buyer_order_no 
+                                   for l in o.invoice_line_ids 
+                                   if l.sale_line_ids and l.sale_line_ids[0].order_id.buyer_order_no]))" />
+                                
+                                <t t-esc="' / '.join(buyer_orders) or ''"/>
                             </td>
                         </tr>
         <!-- <strong>Buyer Order No:</strong>
