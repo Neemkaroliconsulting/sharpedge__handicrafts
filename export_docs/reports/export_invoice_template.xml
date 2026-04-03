@@ -418,7 +418,7 @@
     </t>
 
     <t t-esc="inv_currency.name"/>
-    <t t-esc="o.currency_id.amount_to_text(display_total)"/> Only
+    <t t-esc="o.currency_id.amount_to_text(display_total or 0)"/> Only
 
 </em>
                             </td>
