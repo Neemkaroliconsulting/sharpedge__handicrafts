@@ -68,34 +68,6 @@
            t-value="(insurance_val or 0) / total_qty if (apply_insurance and total_qty) else 0"/>
     </t>
 
-</t><!-- ✅ SIMPLE SAFE LOGIC -->
-
-<t t-set="apply_freight" t-value="wiz.get('apply_freight')"/>
-<t t-set="apply_insurance" t-value="wiz.get('apply_insurance')"/>
-
-<t t-set="total_qty" t-value="sum(product_lines.mapped('quantity')) or 0"/>
-
-<t t-set="freight_per_unit" t-value="0"/>
-<t t-set="insurance_per_unit" t-value="0"/>
-
-<t t-if="apply_freight or apply_insurance">
-
-    <t t-if="len(product_lines) == 1">
-        <t t-set="freight_per_unit"
-           t-value="(freight_val or 0) / product_lines[0].quantity if (apply_freight and product_lines[0].quantity) else 0"/>
-        
-        <t t-set="insurance_per_unit"
-           t-value="(insurance_val or 0) / product_lines[0].quantity if (apply_insurance and product_lines[0].quantity) else 0"/>
-    </t>
-
-    <t t-else="">
-        <t t-set="freight_per_unit"
-           t-value="(freight_val or 0) / total_qty if (apply_freight and total_qty) else 0"/>
-        
-        <t t-set="insurance_per_unit"
-           t-value="(insurance_val or 0) / total_qty if (apply_insurance and total_qty) else 0"/>
-    </t>
-
 </t>
                 <t t-set="discount_total" t-value="sum(product_lines.mapped(lambda l: (l.quantity * l.price_unit * l.discount) / 100)) or 0.0" />
                 <t t-set="net_amount_val" t-value="goods_gross - discount_total" />
