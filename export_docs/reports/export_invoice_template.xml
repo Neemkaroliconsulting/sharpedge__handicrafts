@@ -94,25 +94,7 @@
     <t t-esc="o.company_id.vat"/>
 
 </td>
-                            <!-- <td width="50%">
-                                 <table width="100%" style="border:none;border-collapse:collapse;"> 
-                                    <tr>
-
-                                        <td width="25%"
-                                            style="border:none;  vertical-align:top;">
-                                            <strong>Exporter</strong>
-                                            <t t-if="o.company_id.logo">
-                                                <img t-att-src="image_data_uri(o.company_id.logo)"
-                                                    style="max-height:40px; max-width:70px;" />
-                                            </t>
-                                        </td>
-                                        <td width="75%" style="border:none;">
-
-    <br/>
-    <strong>
-        <t t-esc="o.company_id.name"/>
-    </strong>
-    <br/>
+                            
 
     <!-- Address Line 1 -->
     <t t-esc="o.company_id.street"/><br/>
