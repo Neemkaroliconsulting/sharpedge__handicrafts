@@ -29,6 +29,11 @@
                         <field name="show_dimensions"/>
                     </group>
 
+                    <group string="Freight / Insurance">
+                    <field name="apply_freight"/>
+                    <field name="apply_insurance"/>
+                </group>
+
                 </group>
 
                 <!-- <group string="Summary (Show on Print)" col="2">
