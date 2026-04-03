@@ -93,6 +93,7 @@
                                             <t t-esc="o.company_id.city" />
                                             <br />
                                             <t t-esc="o.company_id.country_id.name" />
+                                            <t t-esc="o.company_id.mobile" />
                                             <br />
                                             <strong>GSTIN:</strong>
                                             <t t-esc="o.company_id.vat" />
