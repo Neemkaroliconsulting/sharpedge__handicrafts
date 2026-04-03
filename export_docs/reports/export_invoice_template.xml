@@ -116,7 +116,7 @@
            if l.sale_line_ids and l.sale_line_ids[0].order_id.buyer_order_no]))" />
 
         <t t-esc="' / '.join(buyer_orders) or ''"/>
-    </td>
+    
 </tr>
                         <!-- ROW 2 : CONSIGNEE + BUYER -->
                         <tr>
