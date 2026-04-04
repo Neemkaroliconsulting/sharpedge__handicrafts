@@ -299,33 +299,7 @@
                                             </t>
                                         </td>
                                         <td align="right"><t t-esc="line.product_id.l10n_in_hsn_code" /></td>
-                                       <td align="right"><t t-esc="line.quantity" /></td>
-
-<!-- ✅ RATE -->
-<td align="right">
-    <t t-set="final_price" t-value="line.price_unit"/>
-    <t t-if="apply_freight or apply_insurance">
-        <t t-set="final_price"
-           t-value="final_price + freight_per_unit + insurance_per_unit"/>
-    </t>
-    <t t-esc="round(final_price,2)" />
-</td>
-
-<!-- ✅ AMOUNT -->
-<td align="right">
-    <t t-set="final_price" t-value="line.price_unit"/>
-    <t t-if="apply_freight or apply_insurance">
-        <t t-set="final_price"
-           t-value="final_price + freight_per_unit + insurance_per_unit"/>
-    </t>
-    <t t-set="final_subtotal" t-value="final_price * line.quantity"/>
-    <t t-esc="round(final_subtotal,2)" />
-</td>
-                                        <td>
-                                                <t t-esc="line.tax_ids[0].amount if line.tax_ids else 0"/>
-                                            </td>
-                                        <td class="text-right"><t t-esc="0.00 if is_lut else round(line.price_subtotal * (line.tax_ids[0].amount/100) * inv_to_comp_rate, 2)"/></td>              
-                                    </tr>
+                                      
                                     <t t-set="sr" t-value="sr + 1" />
                                 </t>
                             </t>
