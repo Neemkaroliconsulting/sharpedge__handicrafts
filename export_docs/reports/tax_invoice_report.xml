@@ -44,6 +44,18 @@
                 <t t-set="discount_amount" t-value="sum(((l.quantity * l.price_unit) * (l.discount or 0) / 100) for l in product_lines)" />
                 <t t-set="freight_total" t-value="sum(freight_lines.mapped('price_subtotal'))" />
                 <t t-set="insurance_total" t-value="sum(insurance_lines.mapped('price_subtotal'))" />
+                <!-- ✅ APPLY FLAGS -->
+                <t t-set="apply_freight" t-value="wiz.get('apply_freight')"/>
+                <t t-set="apply_insurance" t-value="wiz.get('apply_insurance')"/>
+                
+                <!-- ✅ PER UNIT CALC -->
+                <t t-set="total_qty" t-value="sum(product_lines.mapped('quantity')) or 0"/>
+                
+                <t t-set="freight_per_unit"
+                   t-value="(freight_total / total_qty) if (apply_freight and total_qty) else 0"/>
+                
+                <t t-set="insurance_per_unit"
+                   t-value="(insurance_total / total_qty) if (apply_insurance and total_qty) else 0"/>
                 
                 <t t-set="total_igst" t-value="gst_amount * inv_to_comp_rate" />
                 <t t-set="net_cf" t-value="goods_total + freight_total" />
@@ -287,10 +299,28 @@
                                             </t>
                                         </td>
                                         <td align="right"><t t-esc="line.product_id.l10n_in_hsn_code" /></td>
-                                        <td align="right"><t t-esc="line.quantity" /></td>
-                                        <td align="right"><t t-esc="round(line.price_unit,2)" /></td>
-                                        <td align="right"><t t-esc="round(line.price_subtotal,2)" /></td>
-                                        <td align="right"><t t-esc="round(line.price_subtotal * inv_to_comp_rate, 2)" /></td>
+                                       <td align="right"><t t-esc="line.quantity" /></td>
+
+<!-- ✅ RATE -->
+<td align="right">
+    <t t-set="final_price" t-value="line.price_unit"/>
+    <t t-if="apply_freight or apply_insurance">
+        <t t-set="final_price"
+           t-value="final_price + freight_per_unit + insurance_per_unit"/>
+    </t>
+    <t t-esc="round(final_price,2)" />
+</td>
+
+<!-- ✅ AMOUNT -->
+<td align="right">
+    <t t-set="final_price" t-value="line.price_unit"/>
+    <t t-if="apply_freight or apply_insurance">
+        <t t-set="final_price"
+           t-value="final_price + freight_per_unit + insurance_per_unit"/>
+    </t>
+    <t t-set="final_subtotal" t-value="final_price * line.quantity"/>
+    <t t-esc="round(final_subtotal,2)" />
+</td>
                                         <td>
                                                 <t t-esc="line.tax_ids[0].amount if line.tax_ids else 0"/>
                                             </td>
@@ -366,10 +396,38 @@
             <td align="right" style="border:1px solid #000;"> - </td>
         </tr>
 
+        <!-- ✅ FINAL CALCULATED TOTALS -->
+
+<t t-set="final_goods"
+   t-value="
+       goods_total
+       + (0 if apply_freight else freight_total)
+       + (0 if apply_insurance else insurance_total)
+   "/>
+
+<t t-set="final_cf"
+   t-value="
+       goods_total
+       + (0 if apply_freight else freight_total)
+   "/>
+
+<t t-set="final_cif"
+   t-value="
+       goods_total
+       + (0 if apply_freight else freight_total)
+       + (0 if apply_insurance else insurance_total)
+   "/>
+
+<t t-set="final_grand_total"
+   t-value="
+       (final_goods * inv_to_comp_rate)
+       + (gst_amount * inv_to_comp_rate)
+   "/>
+
         <t t-if="wiz.get('show_net_amount')">
             <tr style="font-weight:bold;">
                 <td style="border:1px solid #000; padding:4px;">NET AMOUNT (Goods)</td>
-                <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(goods_total)"/></td>
+                <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(final_goods)"/></td>
                 <td style="border:1px solid #000;"></td>
             </tr>
         </t>
@@ -377,7 +435,7 @@
         <t t-if="wiz.get('show_net_cf')">
             <tr style="font-weight:bold;">
                 <td style="border:1px solid #000; padding:4px;">NET C&amp;F</td>
-                <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(net_cf)"/></td>
+                <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(final_cf)"/></td>
                 <td style="border:1px solid #000;"></td>
             </tr>
         </t>
@@ -385,7 +443,7 @@
         <t t-if="wiz.get('show_net_cif')">
             <tr style="font-weight:bold;">
                 <td style="border:1px solid #000; padding:4px;">NET CIF</td>
-                <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(net_cif_inv)"/></td>
+                <td align="right" style="border:1px solid #000;"><t t-esc="inv_currency.format(final_cif)"/></td>
                 <td style="border:1px solid #000;"></td>
             </tr>
         </t>
@@ -393,7 +451,7 @@
         <tr style="font-weight:bold; background:#f2f2f2;">
             <td style="border:1px solid #000; padding:4px;">GRAND TOTAL (Incl. GST)</td>
             <td colspan="2" align="right" style="border:1px solid #000;">
-                <t t-esc="o.company_id.currency_id.format(net_amount_incl_gst)"/>
+                <t t-esc="o.company_id.currency_id.format(final_grand_total)"/>
             </td>
         </tr>
     </table>
