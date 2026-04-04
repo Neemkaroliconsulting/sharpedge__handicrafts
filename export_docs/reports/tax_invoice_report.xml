@@ -39,7 +39,11 @@
                 <t t-set="goods_total" t-value="sum(product_lines.mapped('price_subtotal'))" />
                 
                 <t t-set="gst_amount"
-                    t-value="sum(o.invoice_line_ids.filtered(lambda l: l.product_id and not (l.product_id.type != 'service' and is_lut)).mapped(lambda l: l.price_subtotal * (l.tax_ids and l.tax_ids[0].amount or 0) / 100))" />
+   t-value="
+       sum(o.invoice_line_ids.mapped(lambda l:
+           (l.price_total - l.price_subtotal)
+       ))
+   "/>
 
                 <t t-set="discount_amount" t-value="sum(((l.quantity * l.price_unit) * (l.discount or 0) / 100) for l in product_lines)" />
                 <t t-set="freight_total" t-value="sum(freight_lines.mapped('price_subtotal'))" />
