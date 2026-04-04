@@ -36,7 +36,17 @@
                 <t t-set="freight_lines"
                     t-value="o.invoice_line_ids.filtered(lambda l: l.product_id and l.product_id.type == 'service' and 'freight' in (l.product_id.name or '').lower())" />
 
-                <t t-set="goods_total" t-value="sum(product_lines.mapped('price_subtotal'))" />
+                <t t-set="goods_total"
+   t-value="
+       sum([
+           (line.quantity * (
+               line.price_unit
+               + (freight_per_unit if apply_freight else 0)
+               + (insurance_per_unit if apply_insurance else 0)
+           ))
+           for line in product_lines
+       ])
+   "/>
                 
                 <t t-set="gst_amount"
    t-value="
