@@ -506,13 +506,17 @@
                             <t t-foreach="hsn_summary" t-as="l">
                                 <tr>
                                     <td><t t-esc="l['hsn']" /></td>
-                                  <td>
+                                 <td>
+    <t t-set="hsn_base" t-value="l['taxable']"/>
+
+    <t t-set="hsn_freight"
+       t-value="(freight_total * (hsn_base / goods_total)) if apply_freight else 0"/>
+
+    <t t-set="hsn_insurance"
+       t-value="(insurance_total * (hsn_base / goods_total)) if apply_insurance else 0"/>
+
     <t t-esc="o.company_id.currency_id.format(
-        (
-            l['taxable']
-            + (freight_total if apply_freight else 0)
-            + (insurance_total if apply_insurance else 0)
-        ) * inv_to_comp_rate
+        (hsn_base + hsn_freight + hsn_insurance) * inv_to_comp_rate
     )"/>
 </td>
                                    <td>
