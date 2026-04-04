@@ -506,7 +506,13 @@
                             <t t-foreach="hsn_summary" t-as="l">
                                 <tr>
                                     <td><t t-esc="l['hsn']" /></td>
-                                    <td><t t-esc="o.company_id.currency_id.format(l['taxable'] * inv_to_comp_rate)" /></td>
+                                   <td>
+    <t t-esc="o.company_id.currency_id.format(
+        (l['taxable']
+         + (freight_total if apply_freight else 0) / len(hsn_summary)
+        ) * inv_to_comp_rate
+    )"/>
+</td>
                                    <td>
                                                <t t-esc="line.tax_ids[0].amount if line.tax_ids else 0"/>
                                             </td>
