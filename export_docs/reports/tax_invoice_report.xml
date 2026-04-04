@@ -368,27 +368,33 @@
             </td>
         </tr>
 
-        <tr>
-            <td style="border:1px solid #000; padding:4px;">Freight</td>
-            <td align="right" style="border:1px solid #000;">
-                <t t-esc="inv_currency.format(freight_total)"/>
-            </td>
-            <td align="right" style="border:1px solid #000;">
-                <t t-set="freight_gst" t-value="sum(freight_lines.mapped(lambda l: (l.price_total - l.price_subtotal) * inv_to_comp_rate))"/>
-                <t t-esc="o.company_id.currency_id.format(freight_gst)"/>
-            </td>
-        </tr>
+        <t t-if="not apply_freight">
+    <tr>
+        <td style="border:1px solid #000; padding:4px;">Freight</td>
+        <td align="right" style="border:1px solid #000;">
+            <t t-esc="inv_currency.format(freight_total)"/>
+        </td>
+        <td align="right" style="border:1px solid #000;">
+            <t t-set="freight_gst"
+               t-value="sum(freight_lines.mapped(lambda l: (l.price_total - l.price_subtotal) * inv_to_comp_rate))"/>
+            <t t-esc="o.company_id.currency_id.format(freight_gst)"/>
+        </td>
+    </tr>
+</t>
 
-        <tr>
-            <td style="border:1px solid #000; padding:4px;">Insurance</td>
-            <td align="right" style="border:1px solid #000;">
-                <t t-esc="inv_currency.format(insurance_total)"/>
-            </td>
-            <td align="right" style="border:1px solid #000;">
-                <t t-set="ins_gst" t-value="sum(insurance_lines.mapped(lambda l: (l.price_total - l.price_subtotal) * inv_to_comp_rate))"/>
-                <t t-esc="o.company_id.currency_id.format(ins_gst)"/>
-            </td>
-        </tr>
+        <t t-if="not apply_insurance">
+    <tr>
+        <td style="border:1px solid #000; padding:4px;">Insurance</td>
+        <td align="right" style="border:1px solid #000;">
+            <t t-esc="inv_currency.format(insurance_total)"/>
+        </td>
+        <td align="right" style="border:1px solid #000;">
+            <t t-set="ins_gst"
+               t-value="sum(insurance_lines.mapped(lambda l: (l.price_total - l.price_subtotal) * inv_to_comp_rate))"/>
+            <t t-esc="o.company_id.currency_id.format(ins_gst)"/>
+        </td>
+    </tr>
+</t>
 
         <tr>
             <td style="border:1px solid #000; padding:4px;">Discount</td>
