@@ -507,17 +507,22 @@
                                 <tr>
                                     <td><t t-esc="l['hsn']" /></td>
                                  <td>
-    <t t-set="hsn_base" t-value="l['taxable']"/>
+    <t t-set="hsn_total" t-value="0"/>
 
-    <t t-set="hsn_freight"
-       t-value="(freight_total * (hsn_base / goods_total)) if apply_freight else 0"/>
+    <t t-foreach="product_lines.filtered(lambda ln: ln.product_id.l10n_in_hsn_code == l['hsn'])" t-as="ln">
+        
+        <!-- SAME LOGIC AS LINE -->
+        <t t-set="price"
+           t-value="ln.price_unit + (freight_per_unit if apply_freight else 0) + (insurance_per_unit if apply_insurance else 0)"/>
 
-    <t t-set="hsn_insurance"
-       t-value="(insurance_total * (hsn_base / goods_total)) if apply_insurance else 0"/>
+        <t t-set="line_total" t-value="price * ln.quantity"/>
 
-    <t t-esc="o.company_id.currency_id.format(
-        (hsn_base + hsn_freight + hsn_insurance) * inv_to_comp_rate
-    )"/>
+        <!-- CONVERT + ADD -->
+        <t t-set="hsn_total" t-value="hsn_total + (line_total * inv_to_comp_rate)"/>
+    </t>
+
+    <!-- FINAL -->
+    <t t-esc="o.company_id.currency_id.format(round(hsn_total,2))"/>
 </td>
                                    <td>
                                                <t t-esc="line.tax_ids[0].amount if line.tax_ids else 0"/>
