@@ -242,7 +242,14 @@
                             <th>Net Wt</th>
                             <th>Gross Wt</th>
                             <th>CBM</th>
-                            <th t-if="wiz.get('show_dimensions')">Box Dimensions(cms) </th>
+                            <t t-set="uom" t-value="invoice and invoice.dimension_uom or 'cm'"/>
+
+                            <th t-if="wiz.get('show_dimensions')">
+                                Box Dimensions (
+                                <t t-if="uom == 'inch'">inch</t>
+                                <t t-else="">cms</t>
+                                )
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
