@@ -6,8 +6,9 @@
             <t t-set="picking" t-value="docs[0]" />
             <t t-set="sale" t-value="picking.sale_id" />
 
-            <t t-set="invoice"
-                t-value="env['account.move'].browse(context.get('invoice_id'))" />
+            <t t-set="invoice_id" t-value="context.get('invoice_id')" />
+<t t-set="invoice"
+   t-value="invoice_id and env['account.move'].browse(invoice_id) or False" />
 
             <t t-set="packing_lines" t-value="picking.packing_line_ids" />
 
