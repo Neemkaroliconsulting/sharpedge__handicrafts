@@ -156,7 +156,6 @@
                             <strong>Buyer Order No :</strong>
                             <t t-esc="'/ '.join(buyer_orders)" />
 
-
                         </td>
                     </tr>
                 </table>
