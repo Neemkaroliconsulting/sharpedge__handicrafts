@@ -98,11 +98,11 @@
    "/>
 
 <t t-set="display_label" t-value="'GRAND TOTAL'"/>
-                <t t-set="final_usd_total"
+             <t t-set="final_usd_total"
    t-value="
-       goods_total
-       + (0 if apply_freight else freight_total)
-       + (0 if apply_insurance else insurance_total)
+       (net_amount_val or 0)
+       + (0 if apply_freight else (freight_val or 0))
+       + (0 if apply_insurance else (insurance_val or 0))
    "/>
 
 <!-- ✅ CF -->
