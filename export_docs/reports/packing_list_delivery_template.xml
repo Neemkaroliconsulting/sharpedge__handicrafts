@@ -363,7 +363,7 @@
                                         <t t-esc="line.cbm" />
                                     </td>
 
-                                  <t t-set="uom" t-value="getattr(sale.company_id, 'dimension_uom', 'cm')"/>
+                                  <t t-set="uom" t-value="wiz.get('dimension_uom') or 'cm'"/>
 
                                         <td t-if="wiz and wiz.get('show_dimensions')" style="white-space:nowrap; text-align:center;">
                                         
