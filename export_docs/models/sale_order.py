@@ -374,6 +374,44 @@ class AccountMove(models.Model):
             else:
                 rec.incoterm_label = "NET USD"
 
+    final_text_amount = fields.Float(
+    string="Final Text Amount",
+    compute="_compute_final_text_amount"
+)
+
+    @api.depends('invoice_line_ids.price_subtotal', 'invoice_incoterm_id')
+    def _compute_final_text_amount(self):
+        for rec in self:
+            product_total = sum(rec.invoice_line_ids.mapped('price_subtotal'))
+    
+            # 👉 yaha tu apni existing logic use kar sakta hai
+            # (freight / insurance already fields me hai ya lines me)
+    
+            freight = sum(
+                rec.invoice_line_ids.filtered(
+                    lambda l: 'freight' in (l.name or '').lower()
+                ).mapped('price_subtotal')
+            )
+    
+            insurance = sum(
+                rec.invoice_line_ids.filtered(
+                    lambda l: 'insurance' in (l.name or '').lower()
+                ).mapped('price_subtotal')
+            )
+    
+            inc = rec.invoice_incoterm_id
+    
+            total = product_total
+    
+            # 🔥 NO HARDCODING (use config if possible)
+            if inc and hasattr(inc, 'include_freight') and inc.include_freight:
+                total += freight
+    
+            if inc and hasattr(inc, 'include_insurance') and inc.include_insurance:
+                total += insurance
+    
+            rec.final_text_amount = total
+
     def _post(self, soft=True):
         res = super()._post(soft)
     
