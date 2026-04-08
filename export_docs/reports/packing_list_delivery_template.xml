@@ -24,7 +24,7 @@
                     t-value="dict(grouped_lines, **{bo: current + [l]})" />
             </t>
 
-            <t t-set="wiz" t-value="context.get('wizard_data', {})" />
+            <t t-set="wiz" t-value="context.get('wizard_data') or {}" />
 
             <div class="page" style="font-family:Times New Roman; font-size:11.5px;">
                 <style>
@@ -364,7 +364,8 @@
 
                                   <t t-set="uom" t-value="getattr(sale.company_id, 'dimension_uom', 'cm')"/>
 
-                                        <td t-if="wiz.get('show_dimensions')" style="white-space:nowrap; text-align:center;">
+                                        <td t-if="wiz and wiz.get('show_dimensions')" style="white-space:nowrap; text-align:center;">
+                                           
                                             
                                             <t t-if="uom == 'inch'">
                                                 <t t-esc="round((line.length or 0) / 2.54, 2)"/> × 
