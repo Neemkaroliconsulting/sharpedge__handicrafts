@@ -432,8 +432,8 @@
     </t>
 
     <t t-esc="inv_currency.name"/>
-    <!-- <t t-esc="o.currency_id.amount_to_text(display_total or 0)"/> Only -->
-    <t t-esc="o.currency_id.amount_to_text(final_usd_total)"/>
+    <t t-esc="o.currency_id.amount_to_text(display_total or 0)"/> Only
+    <!-- <t t-esc="o.currency_id.amount_to_text(final_usd_total)"/> -->
 
 </em>
                             </td>
