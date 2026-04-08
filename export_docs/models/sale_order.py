@@ -360,6 +360,20 @@ class AccountMove(models.Model):
         string="Discount USD", currency_field="currency_id", default=0.0, readonly=True
     )
 
+    incoterm_label = fields.Char(
+    string="Incoterm Label",
+    compute="_compute_incoterm_label"
+)
+    @api.depends('invoice_incoterm_id')
+    def _compute_incoterm_label(self):
+        for rec in self:
+            code = (rec.invoice_incoterm_id.code or '').upper()
+    
+            if code:
+                rec.incoterm_label = f"{code} USD"
+            else:
+                rec.incoterm_label = "NET USD"
+
     def _post(self, soft=True):
         res = super()._post(soft)
     
@@ -687,6 +701,7 @@ class PackingListBatchReport(models.AbstractModel):
                 for batch in batches
             },
         }
+
 
 
     
