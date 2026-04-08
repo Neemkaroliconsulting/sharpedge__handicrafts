@@ -98,6 +98,12 @@
    "/>
 
 <t t-set="display_label" t-value="'GRAND TOTAL'"/>
+                <t t-set="final_usd_total"
+   t-value="
+       goods_total
+       + (0 if apply_freight else freight_total)
+       + (0 if apply_insurance else insurance_total)
+   "/>
 
 <!-- ✅ CF -->
 <t t-if="wiz_summary == 'show_net_cf'">
@@ -426,7 +432,8 @@
     </t>
 
     <t t-esc="inv_currency.name"/>
-    <t t-esc="o.currency_id.amount_to_text(display_total or 0)"/> Only
+    <!-- <t t-esc="o.currency_id.amount_to_text(display_total or 0)"/> Only -->
+    <t t-esc="o.currency_id.amount_to_text(final_usd_total)"/>
 
 </em>
                             </td>
@@ -461,6 +468,11 @@
                                 <td>
                                     <strong>
                                         <t t-esc="o.incoterm_label or 'GRAND TOTAL'"/>
+                                    </strong>
+                                </td>
+                                <td class="text-right" style="border:none; border-left:1px solid #000;">
+                                    <strong>
+                                       <t t-esc="inv_currency.format(final_usd_total)"/>
                                     </strong>
                                 </td>
                                 <td class="text-right" style="border:none; border-left:1px solid #000;">
