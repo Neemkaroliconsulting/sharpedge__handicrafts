@@ -77,6 +77,12 @@
                 <t t-set="net_cf" t-value="goods_total + freight_total" />
                 <t t-set="net_cif_inv" t-value="net_cf + insurance_total" />
                 <t t-set="net_amount_incl_gst" t-value="(o.amount_total * inv_to_comp_rate)" />
+                <t t-set="final_usd_total"
+   t-value="
+       goods_total
+       + (0 if apply_freight else freight_total)
+       + (0 if apply_insurance else insurance_total)
+   "/>
 
                 <div class="page">
                     <style> 
@@ -381,7 +387,8 @@
                                 <strong>Amount Chargeable (In Words)</strong><br />
                                 <em>
     <t t-esc="o.incoterm_label"/>
-    <t t-esc="inv_currency.amount_to_text(o.final_text_amount)"/> Only
+    <!-- <t t-esc="inv_currency.amount_to_text(o.final_text_amount)"/> Only -->
+    <t t-esc="inv_currency.amount_to_text(final_usd_total)"/>Only
 </em>
                                 <br/><br/>
                                 <t t-if="is_lut"><strong>LUT Declaration:</strong> Supply meant for export under LUT without payment of integrated tax.</t>
@@ -497,6 +504,9 @@
                 GRAND TOTAL (Incl. GST)
             </t>
         </td>
+             <td colspan="2" align="right" style="border:1px solid #000;">
+<t t-esc="inv_currency.format(final_usd_total)"/>
+        </td>      
                     <td colspan="2" align="right" style="border:1px solid #000;">
                 <t t-esc="o.company_id.currency_id.format(final_grand_total)"/>
             </td>
