@@ -458,17 +458,18 @@
                                     </t>
 
                                     <tr class="bg-light">
-                                                                        
-                                        <td>
-                                            <strong>
-                                                <t t-esc="o.incoterm_label"/>
-                                            </strong>
-                                        </td>
-                                        <td class="text-right" style="border:none; border-left:1px solid #000;">
-                                            <strong><t t-esc="inv_currency.format(display_total or 0)"/></strong>
-                                        </td>
-                                    </tr>
-                                </table>
+                                <td>
+                                    <strong>
+                                        <t t-esc="o.incoterm_label or 'GRAND TOTAL'"/>
+                                    </strong>
+                                </td>
+                                <td class="text-right" style="border:none; border-left:1px solid #000;">
+                                    <strong>
+                                        <t t-esc="inv_currency.format(display_total or 0)"/>
+                                    </strong>
+                                </td>
+                            </tr>
+                            </table>
                             </td>
                         </tr>
                     </table>
