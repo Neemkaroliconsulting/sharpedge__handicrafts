@@ -304,12 +304,13 @@
                     <thead>
                         <tr>
                             <th width="20%">PKGS</th>
-                            <th width="10%" t-if="wiz.get('show_pcs_per_box')">PCS / Box</th>
+                            
                             <th width="29%">
                                 Item Ref
                             </th >
                             <th width="53%">Product</th>
-                            <th width="13%" t-if="wiz.get('show_total_qty')">Total Qty</th>
+                            <th width="10%" t-if="wiz.get('show_pcs_per_box')">PCS / Box</th>
+                            <th width="13%" >Total Qty</th>
                             <th>Net Wt</th>
                             <th width="13%">Gross Wt</th>
                             <th width="13%">CBM</th>
@@ -358,12 +359,6 @@
                                 <tr>
                                     <td class="text-center" style="vertical-align:middle; white-space:nowrap;">
                                         <t t-esc="line.case_no_from" /> - <t t-esc="line.case_no_to" />
-                                    </td>
-
-
-                                    <td class="text-right" t-if="wiz.get('show_pcs_per_box')">
-                                        <t
-                                            t-esc="line.pcs_per_box" />
                                     </td>
 
                                     <td>
@@ -429,11 +424,13 @@
                                             <br />
                                         </t>
                                     </td>
-
-
-                                    <td class="text-right" t-if="wiz.get('show_total_qty')">
-                                        <t t-esc="line.box_qty * line.pcs_per_box" />
+                                    <td class="text-right" t-if="wiz.get('show_pcs_per_box')">
+                                        <t
+                                            t-esc="line.pcs_per_box" />
                                     </td>
+                                            <td>
+                                                <t t-esc="line.box_qty * line.pcs_per_box" />
+                                            </td>
 
                                     <td class="text-right">
                                         <t t-esc="round(line.net_weight,2)" />
