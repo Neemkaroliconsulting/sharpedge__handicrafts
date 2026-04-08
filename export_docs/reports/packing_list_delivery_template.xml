@@ -234,7 +234,7 @@
                     <thead>
                         <tr>
                             <th>PKGS</th>
-                            <th t-if="wiz.get('show_pcs_per_box')">PCS / Box</th>
+                            
                             <th>Item Ref</th>
                             <th>Product</th>
                             <th t-if="wiz.get('show_total_qty')">Total Qty</th>
@@ -349,9 +349,9 @@
                                     </td>
 
 
-                                    <td t-if="wiz.get('show_total_qty')">
-                                        <t t-esc="line.box_qty * line.pcs_per_box" />
-                                    </td>
+                                                                                   <td>
+                                                    <t t-esc="line.box_qty * line.pcs_per_box" />
+                                                </td>
 
                                     <td>
                                         <t t-esc="line.net_weight" />
