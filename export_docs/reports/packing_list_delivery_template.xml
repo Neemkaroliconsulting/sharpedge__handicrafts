@@ -363,23 +363,23 @@
                                         <t t-esc="line.cbm" />
                                     </td>
 
-                                  <t t-set="uom" t-value="getattr(sale.company_id, 'dimension_uom', 'cm')"/>
+                                  <t t-set="uom" t-value="invoice and invoice.dimension_uom or 'cm'"/>
 
-                                        <td t-if="wiz and wiz.get('show_dimensions')" style="white-space:nowrap; text-align:center;">
-                                        
-                                            <t t-if="uom == 'inch'">
-                                                <t t-esc="('%.2f' % ((line.length or 0) / 2.54))"/> × 
-                                                <t t-esc="('%.2f' % ((line.width or 0) / 2.54))"/> × 
-                                                <t t-esc="('%.2f' % ((line.height or 0) / 2.54))"/>
-                                            </t>
-                                        
-                                            <t t-else="">
-                                                <t t-esc="line.length or 0"/> × 
-                                                <t t-esc="line.width or 0"/> × 
-                                                <t t-esc="line.height or 0"/>
-                                            </t>
-                                        
-                                        </td>
+                                    <td t-if="wiz and wiz.get('show_dimensions')" style="white-space:nowrap; text-align:center;">
+                                    
+                                        <t t-if="uom == 'inch'">
+                                            <t t-esc="('%.2f' % ((line.length or 0) / 2.54))"/> × 
+                                            <t t-esc="('%.2f' % ((line.width or 0) / 2.54))"/> × 
+                                            <t t-esc="('%.2f' % ((line.height or 0) / 2.54))"/>
+                                        </t>
+                                    
+                                        <t t-else="">
+                                            <t t-esc="line.length or 0"/> × 
+                                            <t t-esc="line.width or 0"/> × 
+                                            <t t-esc="line.height or 0"/>
+                                        </t>
+                                    
+                                    </td>
                                 </tr>
 
                                 
