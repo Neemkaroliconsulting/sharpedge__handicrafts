@@ -356,7 +356,7 @@
 
 
                                 <tr>
-                                    <td class="text-right" >
+                                    <td class="text-center" style="vertical-align:middle; white-space:nowrap;">
                                         <t t-esc="line.case_no_from" /> - <t t-esc="line.case_no_to" />
                                     </td>
 
@@ -444,8 +444,13 @@
                                     <td class="text-right">
                                         <t t-esc="round(line.cbm,2)" />
                                     </td>
+                                    <!-- <td style="white-space:nowrap; text-align:center;">
+    <t t-esc="line.length or 0"/> × 
+    <t t-esc="line.width or 0"/> × 
+    <t t-esc="line.height or 0"/>
+</td> -->
 
-                                    <td t-if="wiz.get('show_dimensions')">
+                                    <td t-if="wiz.get('show_dimensions')" tyle="white-space:nowrap; text-align:center;">
                                         <t t-esc="line.length or 0" /> × <t t-esc="line.width or 0" />
                                         × <t t-esc="line.height or 0" />
                                     </td>
